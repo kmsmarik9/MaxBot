@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../KmsDev.MaxBot.Full.Test/KmsDev.MaxBot.Full.Test.csproj" />
+  <Project Path="KmsDev.MaxBot.Full.csproj" />
+</Solution>

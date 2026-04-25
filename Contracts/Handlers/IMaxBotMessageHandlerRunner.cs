@@ -1,4 +1,4 @@
-﻿namespace KmsDev.MaxBot.Full.Contracts
+﻿namespace KmsDev.MaxBot.Full.Handlers
 {
     internal interface IMaxBotMessageHandlerRunner
     {

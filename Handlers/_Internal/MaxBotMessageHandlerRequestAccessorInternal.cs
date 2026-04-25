@@ -1,5 +1,4 @@
-﻿using KmsDev.MaxBot.Full.Contracts;
-using KmsDev.MaxBot.Full.Models;
+﻿using KmsDev.MaxBot.Full.Models;
 using System.Text.Json;
 
 namespace KmsDev.MaxBot.Full.Handlers

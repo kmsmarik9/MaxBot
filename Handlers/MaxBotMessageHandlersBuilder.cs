@@ -1,5 +1,4 @@
-﻿using KmsDev.MaxBot.Full.Contracts;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace KmsDev.MaxBot.Full.Handlers
 {

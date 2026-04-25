@@ -1,6 +1,4 @@
-﻿using KmsDev.MaxBot.Full.Contracts;
-
-namespace KmsDev.MaxBot.Full.Handlers
+﻿namespace KmsDev.MaxBot.Full.Handlers
 {
     internal class MaxBotMessageHandlerInMemoryUserStatePersistenceInternal : IMaxBotMessageHandlerUserSatePersistence
     {

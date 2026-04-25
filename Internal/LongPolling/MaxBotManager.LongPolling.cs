@@ -1,5 +1,4 @@
-﻿using KmsDev.MaxBot.Full.Contracts;
-using KmsDev.MaxBot.Full.Handlers;
+﻿using KmsDev.MaxBot.Full.Handlers;
 using KmsDev.MaxBot.Full.Models;
 using Metalama.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,7 +1,7 @@
 ﻿using KmsDev.MaxBot.Full.Handlers;
 using KmsDev.MaxBot.Full.Models;
 
-namespace KmsDev.MaxBot.Full.Contracts
+namespace KmsDev.MaxBot.Full.Handlers
 {
     public interface IMaxBotMessageHandlerRequestAccessor
     {

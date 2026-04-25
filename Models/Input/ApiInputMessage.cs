@@ -34,7 +34,7 @@ namespace KmsDev.MaxBot.Full.Models
         /// Содержимое сообщения. Текст + вложения. Может быть null, если сообщение содержит только пересланное сообщение
         /// </summary>
         [JsonPropertyName("body")]
-        public ApiInputMessageBody? Body { get; init; }
+        public ApiInputMessageBody Body { get; init; }
 
         /// <summary>
         /// Статистика сообщения.

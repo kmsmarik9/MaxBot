@@ -4,8 +4,6 @@ using System.Text.Json.Serialization;
 
 namespace KmsDev.MaxBot.Full.Requests
 {
-    //TODO not-tested
-
     public partial class UnsetSubscriptionRequest : RequestBase<UnsetSubscriptionResponse>
     {
         [JsonIgnore]
@@ -35,13 +33,13 @@ namespace KmsDev.MaxBot.Full
 {
     public static partial class MaxBotExtensions
     {
-        public static Task<UnsetSubscriptionResponse> UnsetSubscriptionAsync(this MaxBotClientApiContainer.MessagesSection messagesSection, UnsetSubscriptionRequest messageRequest, Action<UnsetSubscriptionRequest.ResilienceDefaultSettings>? resilienceSettingsAction = default, CancellationToken cancellationToken = default)
+        public static Task<UnsetSubscriptionResponse> UnsetSubscriptionAsync(this MaxBotClientApiContainer.SubscriptionsSection subscriptionsSection, UnsetSubscriptionRequest messageRequest, Action<UnsetSubscriptionRequest.ResilienceDefaultSettings>? resilienceSettingsAction = default, CancellationToken cancellationToken = default)
         {
             var requestResilienceSettings = new UnsetSubscriptionRequest.ResilienceDefaultSettings();
 
             resilienceSettingsAction?.Invoke(requestResilienceSettings);
 
-            return messagesSection.MaxBotClient.SendRequestAsync(messageRequest, requestResilienceSettings, cancellationToken);
+            return subscriptionsSection.MaxBotClient.SendRequestAsync(messageRequest, requestResilienceSettings, cancellationToken);
         }
     }
 }

@@ -2,8 +2,17 @@
 
 namespace KmsDev.MaxBot.Full.Models
 {
-    public class ApiInputUpdateMessageCreated
+    public class ApiInputUpdateMessageCreated : IApiInputUpdateItem
     {
+        public MaxBotUpdateType UpdateType => MaxBotUpdateType.MessageCreated;
+
+        /// <summary>
+        /// Unix-время, когда произошло событие
+        /// </summary>
+        [JsonPropertyName("timestamp")]
+        [JsonConverter(typeof(UnixDateTimeOffsetConverter))]
+        public DateTimeOffset Timestamp { get; init; }
+
         /// <summary>
         /// Новое созданное сообщение
         /// </summary>

@@ -3,10 +3,10 @@ using KmsDev.MaxBot.Full.Responses;
 
 namespace KmsDev.MaxBot.Full.Requests
 {
-    //TODO not-tested
-
     public partial class GetSubscriptionsRequest : RequestBase<GetSubscriptionsResponse>
     {
+        public static readonly GetSubscriptionsRequest STATIC = new();
+
         public override MaxBotRequestHttpSettings GetRequestHttpSettings()
         {
             return new MaxBotRequestHttpSettings
@@ -31,13 +31,13 @@ namespace KmsDev.MaxBot.Full
 {
     public static partial class MaxBotExtensions
     {
-        public static Task<GetSubscriptionsResponse> GetSubscriptionsAsync(this MaxBotClientApiContainer.MessagesSection messagesSection, GetSubscriptionsRequest request, Action<GetSubscriptionsRequest.ResilienceDefaultSettings>? resilienceSettingsAction = default, CancellationToken cancellationToken = default)
+        public static Task<GetSubscriptionsResponse> GetSubscriptionsAsync(this MaxBotClientApiContainer.SubscriptionsSection subscriptionsSection, Action<GetSubscriptionsRequest.ResilienceDefaultSettings>? resilienceSettingsAction = default, CancellationToken cancellationToken = default)
         {
             var requestResilienceSettings = new GetSubscriptionsRequest.ResilienceDefaultSettings();
 
             resilienceSettingsAction?.Invoke(requestResilienceSettings);
 
-            return messagesSection.MaxBotClient.SendRequestAsync(request, requestResilienceSettings, cancellationToken);
+            return subscriptionsSection.MaxBotClient.SendRequestAsync(GetSubscriptionsRequest.STATIC, requestResilienceSettings, cancellationToken);
         }
     }
 }

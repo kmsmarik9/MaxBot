@@ -20,7 +20,7 @@ namespace KmsDev.MaxBot.Full.Requests
             (
                 inputValue: this,
                 inputType: GetType(),
-                options: MaxBotInternalConstants.RequestJsonSerializerOptions,
+                options: MaxBotConstantsInternal.RequestJsonSerializerOptions,
                 mediaType: new System.Net.Http.Headers.MediaTypeHeaderValue("application/json")
             );
         }

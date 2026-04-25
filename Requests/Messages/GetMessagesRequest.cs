@@ -5,8 +5,6 @@ using System.Text.Json.Serialization;
 
 namespace KmsDev.MaxBot.Full.Requests
 {
-    //TODO not-tested
-
     public partial class GetMessagesRequest : RequestBase<GetMessagesResponse>
     {
         /// <summary>

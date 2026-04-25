@@ -5,7 +5,6 @@ using System.Text.Json.Serialization;
 
 namespace KmsDev.MaxBot.Full.Requests
 {
-    //TODO not-tested
     public partial class EditMessageRequest : RequestBase<EditMessageResponse>, IMaxBotMessageRequestWithAttachments
     {
         [JsonIgnore]
@@ -41,7 +40,7 @@ namespace KmsDev.MaxBot.Full.Requests
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Put,
-                Url = $"message_id={MessageId}"
+                Url = $"messages?message_id={MessageId}"
             };
         }
 

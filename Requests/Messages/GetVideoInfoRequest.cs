@@ -4,8 +4,6 @@ using System.Text.Json.Serialization;
 
 namespace KmsDev.MaxBot.Full.Requests
 {
-    //TODO not-tested
-
     public partial class GetVideoInfoRequest : RequestBase<GetVideoInfoResponse>
     {
         [JsonIgnore]

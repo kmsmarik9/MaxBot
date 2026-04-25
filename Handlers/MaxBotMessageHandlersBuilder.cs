@@ -34,7 +34,7 @@ namespace KmsDev.MaxBot.Full.Handlers
                 commandName,
                 requestData =>
                 {
-                    var messageText = requestData.UpdateMessageContainer.MessageCreated?.Message?.Body?.Text ?? string.Empty;
+                    var messageText = requestData.UpdateMessageContainer.MessageCreated?.Message.Body?.Text ?? string.Empty;
 
                     if (!messageText.StartsWith('/'))
                     {

@@ -1,10 +1,10 @@
 ﻿namespace KmsDev.MaxBot.Full
 {
-    internal class MaxBotClientBuilder : IMaxBotClientBuilder
+    internal class MaxBotClientBuilderInternal : IMaxBotClientBuilder
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public MaxBotClientBuilder(IServiceProvider serviceProvider)
+        public MaxBotClientBuilderInternal(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
@@ -16,7 +16,7 @@
                 throw new ArgumentException("empty", nameof(token));
             }
 
-            return new MaxBotClient(_serviceProvider, token, botHashSeed, cancellationToken);
+            return new MaxBotClientInternal(_serviceProvider, token, botHashSeed, cancellationToken);
         }
     }
 }

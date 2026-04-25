@@ -5,10 +5,10 @@ using System.Text.Json.Serialization;
 
 namespace KmsDev.MaxBot.Full.Requests
 {
-    //TODO not-tested
-
     /// <summary>
     /// Этот метод используется для отправки ответа после того, как пользователь нажал на кнопку. Ответом может быть обновленное сообщение и/или одноразовое уведомление для пользователя
+    /// <br/>
+    /// Обязательно должно быть заполнено поле Message или Notification
     /// </summary>
     public partial class CallbackAnswerRequest : RequestBase<CallbackAnswerResponse>
     {

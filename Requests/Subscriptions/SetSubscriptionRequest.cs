@@ -4,8 +4,6 @@ using System.Text.Json.Serialization;
 
 namespace KmsDev.MaxBot.Full.Requests
 {
-    //TODO not-tested
-
     public partial class SetSubscriptionRequest : RequestBase<SetSubscriptionResponse>
     {
         /// <summary>
@@ -18,7 +16,7 @@ namespace KmsDev.MaxBot.Full.Requests
         /// Список типов обновлений, которые хочет получать ваш бот.
         /// </summary>
         [JsonPropertyName("update_types")]
-        public List<MaxBotUpdateType> UpdateTypes { get; set; }
+        public List<MaxBotUpdateType> UpdateTypes { get; set; } = [];
 
         /// <summary>
         /// Cекрет, который должен быть отправлен в заголовке X-Max-Bot-Api-Secret в каждом запросе Webhook. Разрешены только символы A-Z, a-z, 0-9, и дефис. Заголовок рекомендован, чтобы запрос поступал из установленного веб-узла
@@ -50,13 +48,13 @@ namespace KmsDev.MaxBot.Full
 {
     public static partial class MaxBotExtensions
     {
-        public static Task<SetSubscriptionResponse> SetSubscriptionAsync(this MaxBotClientApiContainer.MessagesSection messagesSection, SetSubscriptionRequest request, Action<SetSubscriptionRequest.ResilienceDefaultSettings>? resilienceSettingsAction = default, CancellationToken cancellationToken = default)
+        public static Task<SetSubscriptionResponse> SetSubscriptionAsync(this MaxBotClientApiContainer.SubscriptionsSection subscriptionsSection, SetSubscriptionRequest request, Action<SetSubscriptionRequest.ResilienceDefaultSettings>? resilienceSettingsAction = default, CancellationToken cancellationToken = default)
         {
             var requestResilienceSettings = new SetSubscriptionRequest.ResilienceDefaultSettings();
 
             resilienceSettingsAction?.Invoke(requestResilienceSettings);
 
-            return messagesSection.MaxBotClient.SendRequestAsync(request, requestResilienceSettings, cancellationToken);
+            return subscriptionsSection.MaxBotClient.SendRequestAsync(request, requestResilienceSettings, cancellationToken);
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace KmsDev.MaxBot.Full
 {
-    internal static class MaxBotInternalConstants
+    internal static class MaxBotConstantsInternal
     {
         public static readonly JsonSerializerOptions RequestJsonSerializerOptions = new JsonSerializerOptions
         {

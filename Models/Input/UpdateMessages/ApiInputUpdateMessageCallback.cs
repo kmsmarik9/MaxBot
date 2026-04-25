@@ -2,8 +2,10 @@
 
 namespace KmsDev.MaxBot.Full.Models
 {
-    public class ApiInputUpdateMessageCallback
+    public class ApiInputUpdateMessageCallback : IApiInputUpdateItem
     {
+        public MaxBotUpdateType UpdateType => MaxBotUpdateType.MessageCallback;
+
         /// <summary>
         /// Unix-время, когда произошло событие
         /// </summary>
@@ -11,9 +13,6 @@ namespace KmsDev.MaxBot.Full.Models
         [JsonConverter(typeof(UnixDateTimeOffsetConverter))]
         public DateTimeOffset TimeStamp { get; set; }
 
-        /// <summary>
-        /// клавиатура
-        /// </summary>
         [JsonPropertyName("callback")]
         public required ApiInputCallback Callback { get; set; }
 

@@ -10,7 +10,7 @@ using System.Web;
 
 namespace KmsDev.MaxBot.Full
 {
-    internal class MaxBotClient : IMaxBotClient
+    internal class MaxBotClientInternal : IMaxBotClient
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly string _token;
@@ -18,7 +18,7 @@ namespace KmsDev.MaxBot.Full
 
         public CancellationToken SelfCancellationToken { get; }
 
-        public MaxBotClient(IServiceProvider serviceProvider, string token, string secretKey = "", CancellationToken cancellationToken = default)
+        public MaxBotClientInternal(IServiceProvider serviceProvider, string token, string secretKey = "", CancellationToken cancellationToken = default)
         {
             _serviceProvider = serviceProvider;
             _token = token;

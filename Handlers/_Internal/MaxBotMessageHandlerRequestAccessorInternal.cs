@@ -43,27 +43,6 @@ namespace KmsDev.MaxBot.Full.Handlers
             {
                 var persistenceValue = await _userSatePersistence.LoadAsync(RequestData.HandlersPrefix, RequestData.MaxUserId);
 
-                //var sqlUserStateEntity = await _context.UserStates.FirstOrDefaultAsync(p => p.BotHash == botHash && p.TelegramUserId == MaxUserId);
-
-                //if (sqlUserStateEntity == null)
-                //{
-                //    sqlUserStateEntity = new TelegramUserState
-                //    {
-                //        BotHash = botHash,
-                //        TelegramUserId = MaxUserId,
-                //        FullRoutePath = string.Empty,
-                //        Data = "{}"
-                //    };
-
-                //    _context.UserStates.Add(sqlUserStateEntity);
-
-                //    _sqlUserStateEntity = sqlUserStateEntity;
-                //}
-                //else
-                //{
-                //    _sqlUserStateEntity = sqlUserStateEntity;
-                //}
-
                 if (persistenceValue.HasValue) 
                 {
                     RouteContainer.Init(persistenceValue.Value.Route);
@@ -82,11 +61,6 @@ namespace KmsDev.MaxBot.Full.Handlers
 
         public async Task SaveStateChangesAsync()
         {
-            //_sqlUserStateEntity.StatePath = UserState.CurrentPath;
-            //_sqlUserStateEntity.Data = UserState.Data != null ? JsonSerializer.Serialize(UserState.Data) : "{}";
-
-            //await _context.SaveChangesAsync();
-
             await _userSatePersistence.SaveAsync(RequestData.HandlersPrefix, RequestData.MaxUserId, (RouteContainer.FullRoutePath, JsonSerializer.Serialize(UserState)));
         }
 
@@ -97,7 +71,25 @@ namespace KmsDev.MaxBot.Full.Handlers
                 return null;
             }
 
-            return updateMessage.MessageCreated?.Message?.Sender?.UserId;
+            return updateMessage switch
+            {
+                { MessageCreated: ApiInputUpdateMessageCreated mc } => mc.Message.Sender?.UserId,
+                { MessageCallback: ApiInputUpdateMessageCallback mc } => mc.Callback.User.UserId,
+                { MessageEdited: ApiInputUpdateMessageEdited me } => me.Message.Sender?.UserId,
+                { MessageRemoved: ApiInputUpdateMessageRemoved mr} => mr.UserId,
+                { BotAdded: ApiInputUpdateBotAdded ba } => ba.User.UserId,
+                { BotRemoved: ApiInputUpdateBotRemoved br } => br.User.UserId,
+                { DialogMuted: ApiInputUpdateDialogMuted dm } => dm.User.UserId,
+                { DialogUnmuted: ApiInputUpdateDialogUnmuted du } => du.User.UserId,
+                { DialogCleared: ApiInputUpdateDialogCleared dc } => dc.User.UserId,
+                { DialogRemoved: ApiInputUpdateDialogRemoved dr } => dr.User.UserId,
+                { UserAdded: ApiInputUpdateUserAdded ua } => ua.User.UserId,
+                { UserRemoved: ApiInputUpdateUserRemoved ur } => ur.User.UserId,
+                { BotStarted: ApiInputUpdateBotStarted bs } => bs.User.UserId,
+                { BotStopped: ApiInputUpdateBotStoped bs } => bs.User.UserId,
+                { ChatTitleChanged: ApiInputUpdateChatTitleChanged ctc } => ctc.User.UserId,
+                _ => null
+             };
         }
     }
 }

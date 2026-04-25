@@ -1,17 +1,17 @@
 ﻿using KmsDev.MaxBot.Full.Contracts;
 using KmsDev.MaxBot.Full.Handlers;
 using KmsDev.MaxBot.Full.Models;
-using KmsDev.MaxBot.Full.Requests;
 using Metalama.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using OneOf;
 
 namespace KmsDev.MaxBot.Full
 {
-    internal partial class MaxBotManager : IMaxBotManager
+    internal partial class MaxBotLongPollingManagerInternal : IMaxBotManager
     {
         [Dependency]
         private readonly IServiceScopeFactory _serviceScopeFactory;
+
         private readonly SemaphoreSlim _managementSemaphore = new(1);
         private readonly Dictionary<ulong, MaxBotStoreItem> _bots = [];
 

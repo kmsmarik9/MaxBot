@@ -2,41 +2,40 @@
 
 namespace KmsDev.MaxBot.Full.Models
 {
-    public class ApiInputUpdateBotStarted : IApiInputUpdateItem
+    public class ApiInputUpdateDialogMuted : IApiInputUpdateItem
     {
-        public MaxBotUpdateType UpdateType => MaxBotUpdateType.BotStarted;
+        public MaxBotUpdateType UpdateType => MaxBotUpdateType.DialogMuted;
 
         /// <summary>
         /// Unix-время, когда произошло событие
         /// </summary>
         [JsonPropertyName("timestamp")]
         [JsonConverter(typeof(UnixDateTimeOffsetConverter))]
-        public DateTimeOffset TimeStamp { get; set; }
+        public DateTimeOffset Timestamp { get; init; }
 
         /// <summary>
         /// ID чата, где произошло событие
         /// </summary>
         [JsonPropertyName("chat_id")]
-        public long ChatId { get; set; }
+        public long ChatId { get; init; }
 
         /// <summary>
-        /// Пользователь, который нажал кнопку 'Start'
+        /// Пользователь, который отключил уведомления
         /// </summary>
         [JsonPropertyName("user")]
-        public required ApiInputUser User { get; set; }
+        public ApiInputUser User { get; init; }
 
         /// <summary>
-        /// Дополнительные данные из дип-линков, переданные при запуске бота
-        /// <br/>
-        /// до 512 символов
+        /// Время в формате Unix, до наступления которого диалог был отключён
         /// </summary>
-        [JsonPropertyName("payload")]
-        public string? Payload { get; set; }
+        [JsonPropertyName("muted_until")]
+        [JsonConverter(typeof(UnixDateTimeOffsetConverter))]
+        public DateTimeOffset MutedUntil { get; init; }
 
         /// <summary>
         /// Текущий язык пользователя в формате IETF BCP 47
         /// </summary>
         [JsonPropertyName("user_locale")]
-        public string? UserLocale { get; set; }
+        public string? UserLocale { get; init; }
     }
 }

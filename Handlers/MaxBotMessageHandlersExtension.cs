@@ -48,12 +48,12 @@ namespace KmsDev.MaxBot.Full.Handlers
                 CustomUserStatePersistence = null;
             }
 
-            public MaxBotMessageHandlerSystemConfig UseSqliteUserStatePersistence(string fileName)
-            {
-                ResetPersistenceFlags();
-                DefaultSqliteFileName = fileName;
-                return this;
-            }
+            //public MaxBotMessageHandlerSystemConfig UseSqliteUserStatePersistence(string fileName)
+            //{
+            //    ResetPersistenceFlags();
+            //    DefaultSqliteFileName = fileName;
+            //    return this;
+            //}
 
             public MaxBotMessageHandlerSystemConfig UseCustomUserStatePersistence<TPersistence>()
                 where TPersistence : class, IMaxBotMessageHandlerUserSatePersistence

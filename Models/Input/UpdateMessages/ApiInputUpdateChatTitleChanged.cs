@@ -2,9 +2,9 @@
 
 namespace KmsDev.MaxBot.Full.Models
 {
-    public class ApiInputUpdateBotStarted : IApiInputUpdateItem
+    public class ApiInputUpdateChatTitleChanged : IApiInputUpdateItem
     {
-        public MaxBotUpdateType UpdateType => MaxBotUpdateType.BotStarted;
+        public MaxBotUpdateType UpdateType => MaxBotUpdateType.ChatTitleChanged;
 
         /// <summary>
         /// Unix-время, когда произошло событие
@@ -20,23 +20,15 @@ namespace KmsDev.MaxBot.Full.Models
         public long ChatId { get; set; }
 
         /// <summary>
-        /// Пользователь, который нажал кнопку 'Start'
+        /// Пользователь, который изменил название
         /// </summary>
         [JsonPropertyName("user")]
         public required ApiInputUser User { get; set; }
 
         /// <summary>
-        /// Дополнительные данные из дип-линков, переданные при запуске бота
-        /// <br/>
-        /// до 512 символов
+        /// Новое название
         /// </summary>
-        [JsonPropertyName("payload")]
-        public string? Payload { get; set; }
-
-        /// <summary>
-        /// Текущий язык пользователя в формате IETF BCP 47
-        /// </summary>
-        [JsonPropertyName("user_locale")]
-        public string? UserLocale { get; set; }
+        [JsonPropertyName("title")]
+        public string Title { get; init; }
     }
 }

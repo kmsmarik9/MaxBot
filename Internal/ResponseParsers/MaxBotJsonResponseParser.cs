@@ -9,7 +9,7 @@ namespace KmsDev.MaxBot.Full
             where TResponse : IMaxBotResponse
         {
             var text = await response.Content.ReadAsStringAsync(cancellationToken);
-            return JsonSerializer.Deserialize<TResponse>(text, MaxBotInternalConstants.ResponseJsonSerializerOptions)!;
+            return JsonSerializer.Deserialize<TResponse>(text, MaxBotConstantsInternal.ResponseJsonSerializerOptions)!;
         }
     }
 }

@@ -5,22 +5,27 @@ namespace KmsDev.MaxBot.Full
 {
     public static partial class MaxBotExtensions
     {
-        public static IServiceCollection AddMaxBotSystem(this IServiceCollection serviceCollection, Action<MaxBotRequestsConfigurer>? requestConfigurer = null)
+        public static IServiceCollection AddMaxBotSystem(this IServiceCollection serviceCollection, Action<MaxBotSystemConfigurer>? systemConfigurer = null) //, Action<MaxBotRequestsConfigurer>? requestConfigurer = null)
         {
-            serviceCollection.AddSingleton<IMaxBotClientBuilder, MaxBotClientBuilder>();
-            serviceCollection.AddSingleton<IMaxBotManager, MaxBotManager>();
+            serviceCollection.AddSingleton<IMaxBotClientBuilder, MaxBotClientBuilderInternal>();
+            serviceCollection.AddSingleton<IMaxBotManager, MaxBotLongPollingManagerInternal>();
 
             {
-                var requestsBuilder = new MaxBotRequestsConfigurer();
+                var conf = new MaxBotSystemConfigurer();
+                systemConfigurer?.Invoke(conf);
+                conf.ConfigureServices(serviceCollection);
+            }
 
-                requestConfigurer?.Invoke(requestsBuilder);
-                requestsBuilder.ConfigureServices(serviceCollection);
+            {
+                var conf = new MaxBotRequestsConfigurer();
+                //requestConfigurer?.Invoke(requestsBuilder);
+                conf.ConfigureServices(serviceCollection);
             }
 
             return serviceCollection;
         }
 
-        public static bool IsPresent<T>(this T? value)
+        internal static bool IsPresent<T>(this T? value)
         {
             return value != null;
         }

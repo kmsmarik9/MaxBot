@@ -2,33 +2,33 @@
 
 namespace KmsDev.MaxBot.Full.Models
 {
-    public class ApiInputUpdateBotStoped : IApiInputUpdateItem
+    public class ApiInputUpdateDialogRemoved : IApiInputUpdateItem
     {
-        public MaxBotUpdateType UpdateType => MaxBotUpdateType.BotStopped;
+        public MaxBotUpdateType UpdateType => MaxBotUpdateType.DialogRemoved;
 
         /// <summary>
         /// Unix-время, когда произошло событие
         /// </summary>
         [JsonPropertyName("timestamp")]
         [JsonConverter(typeof(UnixDateTimeOffsetConverter))]
-        public DateTimeOffset TimeStamp { get; set; }
+        public DateTimeOffset Timestamp { get; init; }
 
         /// <summary>
         /// ID чата, где произошло событие
         /// </summary>
         [JsonPropertyName("chat_id")]
-        public long ChatId { get; set; }
+        public long ChatId { get; init; }
 
         /// <summary>
-        /// Пользователь, который остановил чат
+        /// Пользователь, который удалил чат
         /// </summary>
         [JsonPropertyName("user")]
-        public required ApiInputUser User { get; set; }
+        public ApiInputUser User { get; init; }
 
         /// <summary>
         /// Текущий язык пользователя в формате IETF BCP 47
         /// </summary>
         [JsonPropertyName("user_locale")]
-        public string? UserLocale { get; set; }
+        public string? UserLocale { get; init; }
     }
 }

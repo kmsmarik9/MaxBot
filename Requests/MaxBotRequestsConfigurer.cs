@@ -110,11 +110,13 @@ namespace KmsDev.MaxBot.Full.Requests
                         .GetValue(null)!
                         .ToString()!;
 
-                    var httpClientBuilder = serviceCollection.AddHttpClient(requestName, c =>
-                    {
-                        c.BaseAddress = defaultUri;
-                        c.Timeout = Timeout.InfiniteTimeSpan;
-                    });
+                    var httpClientBuilder = serviceCollection
+                        .AddHttpClient(requestName, c =>
+                        {
+                            c.BaseAddress = defaultUri;
+                            c.Timeout = Timeout.InfiniteTimeSpan;
+                        })
+                        .SetHandlerLifetime(TimeSpan.FromHours(1));
 
                     {
                         Action<ResiliencePipelineBuilder<HttpResponseMessage>> finalRpbAction = _defaultRpbAction;

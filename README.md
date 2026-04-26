@@ -18,6 +18,18 @@ using KmsDev.MaxBot.Full;
 serviceCollections.AddMaxBotSystem();
 ```
 
+Если в системе пралируется 1 бот, то можно использовать AddSingletonClient
+- добавляет singleton `IMaxBotClient`
+- если задать `handlersOptions`, то будет так же добавлен LongPollingManager
+
+пример:
+```csharp
+serviceCollections.AddMaxBotSystem(sc =>
+{
+    sc.AddSingletonClient((БОТ_ТОКЕН, null), ("default_routes", new MaxBotSystemConfigurer.LongPollingManagerOptions()));
+});
+```
+
 ### Создание MaxBotClient
 ```csharp
 //получить client builder

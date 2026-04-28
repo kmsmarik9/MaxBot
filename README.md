@@ -13,7 +13,7 @@ dotnet add package KmsDev.MaxBot
 
 ### Подключение MaxBotSystem
 ```csharp
-using KmsDev.MaxBot.Full;
+using KmsDev.MaxBot;
 
 serviceCollections.AddMaxBotSystem();
 ```
@@ -44,7 +44,7 @@ var maxBot = maxBotClientBuilder.Build(БОТ_ТОКЕН);
 ### LongPolling
 Вызов `AddLongPollingManager` добавляет в DI интерфейс `IMaxBotManager`
 ```csharp
-using KmsDev.MaxBot.Full;
+using KmsDev.MaxBot;
 
 //подключение основной системы
 serviceCollections.AddMaxBotSystem(sc =>
@@ -76,8 +76,8 @@ serviceCollections.AddMaxBotSystem(sc =>
 
 пример использования api:
 ```csharp
-using KmsDev.MaxBot.Full.Requests;
-using KmsDev.MaxBot.Full.Models;
+using KmsDev.MaxBot.Requests;
+using KmsDev.MaxBot.Models;
 
 var response = await maxBot.Api.Messages.SendMessageAsync(new SendMessageRequest
 {

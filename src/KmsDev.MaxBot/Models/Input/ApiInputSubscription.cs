@@ -1,0 +1,23 @@
+﻿using System.Text.Json.Serialization;
+
+namespace KmsDev.MaxBot.Models
+{
+    public class ApiInputSubscription
+    {
+        /// <summary>
+        /// URL вебхука
+        /// </summary>
+        [JsonPropertyName("url")]
+        public string Url { get; init; }
+
+        /// <summary>
+        /// Unix-время, когда была создана подписка
+        /// </summary>
+        [JsonPropertyName("time")]
+        [JsonConverter(typeof(UnixDateTimeOffsetConverter))]
+        public DateTimeOffset Time { get; init; }
+
+        [JsonPropertyName("update_types")]
+        public List<MaxBotUpdateType> UpdateTypes { get; init; } = [];
+    }
+}

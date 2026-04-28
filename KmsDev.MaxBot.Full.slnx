@@ -1,3 +1,10 @@
 <Solution>
-  <Project Path="KmsDev.MaxBot.Full.csproj" />
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="LamaDebug" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="KmsDev.MaxBot_old.csproj" />
+  </Folder>
 </Solution>

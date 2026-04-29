@@ -4,34 +4,40 @@ using Metalama.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using OneOf;
 
-namespace KmsDev.MaxBot
+namespace KmsDev.MaxBot.LongPollingManager
 {
-    internal partial class MaxBotLongPollingManagerInternal : IMaxBotManager
+    internal partial class MaxBotLongPollingManagerInternal : IMaxBotLongPollingManager
     {
         [Dependency]
-        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly IServiceProvider _serviceProvider;
 
         private readonly SemaphoreSlim _managementSemaphore = new(1);
-        private readonly Dictionary<ulong, MaxBotStoreItem> _bots = [];
+        private readonly Dictionary<string, MaxBotStoreItem> _bots = [];
 
         public event MaxBotMessageHandlerErrorDelegate? BotMessageHandlerError;
 
-        public async Task AddBotAsync(IMaxBotClient maxBotClient, string handlersPrefix, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Начать LongPolling подписку
+        /// </summary>
+        /// <param name="maxBotClient"></param>
+        /// <param name="handlersPrefix"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task StartBotAsync(IMaxBotClient maxBotClient, string handlersPrefix, CancellationToken cancellationToken = default)
         {
-            await _managementSemaphore.WaitAsync();
-
-            try
+            if (_bots.ContainsKey(maxBotClient.BotHash))
             {
-                if (_bots.ContainsKey(maxBotClient.BotHash))
-                {
-                    //TODO
-                }
-                else
-                {
-                    var internalCts = CancellationTokenSource.CreateLinkedTokenSource(maxBotClient.SelfCancellationToken, cancellationToken);
+                //TODO
+            }
+            else
+            {
+                var internalCts = CancellationTokenSource.CreateLinkedTokenSource(maxBotClient.SelfCancellationToken, cancellationToken);
+                var meResponse = await maxBotClient.Api.Bots.GetMeAsync(cancellationToken: internalCts.Token);
 
-                    var meResponse = await maxBotClient.Api.Bots.GetMeAsync(cancellationToken: internalCts.Token);
+                await _managementSemaphore.WaitAsync();
 
+                try
+                {
                     _bots[maxBotClient.BotHash] = new MaxBotStoreItem
                     {
                         MaxBotClient = maxBotClient,
@@ -39,20 +45,25 @@ namespace KmsDev.MaxBot
                         CancellationTokenSource = internalCts,
                         PollingReceiveTask = maxBotClient.StartLongPollingAsync
                         (
-                            updateHandler: (_,updateMessage, ct) => HandleUpdateMessage(maxBotClient, handlersPrefix, updateMessage, ct),
+                            updateHandler: (_, updateMessage, ct) => HandleUpdateMessage(maxBotClient, handlersPrefix, updateMessage, ct),
                             errorHandler: (_, errorType, ex, ct) => HandleError(maxBotClient, errorType, ex, ct),
                             cancellationToken: internalCts.Token
                         )
                     };
                 }
-            }
-            finally
-            {
-                _managementSemaphore.Release();
+                finally
+                {
+                    _managementSemaphore.Release();
+                }
             }
         }
 
-        public async Task StopBot(OneOf<IMaxBotClient, ulong> target)
+        /// <summary>
+        /// Остановить подписку
+        /// </summary>
+        /// <param name="target">Можно передать MaxBotClient или BotHash</param>
+        /// <returns></returns>
+        public async Task StopBotAsync(OneOf<IMaxBotClient, string> target)
         {
             var botHash = target.Match
             (
@@ -89,22 +100,12 @@ namespace KmsDev.MaxBot
 
         private async Task HandleUpdateMessage(IMaxBotClient maxBotClient, string handlersPrefix, ApiInputUpdateMessagePolymorphContainer updateMessage, CancellationToken cancellationToken)
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            var runner = _serviceProvider.GetRequiredService<IMaxBotMessageHandlerRunner>();
 
-            var requestAccessor = scope.ServiceProvider.GetRequiredKeyedService<IMaxBotMessageHandlerRequestAccessor>(handlersPrefix);
-
-            var initResult = await requestAccessor.InitAsync(maxBotClient, handlersPrefix, updateMessage);
-            if (!initResult)
-            {
-                return;
-            }
-
-            var runner = scope.ServiceProvider.GetRequiredService<IMaxBotMessageHandlerRunner>();
-
-            await runner.RunAsync(handlersPrefix);
+            await runner.RunAsync(maxBotClient, handlersPrefix, updateMessage, cancellationToken);
         }
 
-        private async Task HandleError(IMaxBotClient maxBotClient, MaxBotGetUpdatesErrorType errorType, Exception ex, CancellationToken cancellationToken)
+        private async Task HandleError(IMaxBotClient maxBotClient, MaxBotLongPollingErrorType errorType, Exception ex, CancellationToken cancellationToken)
         {
             BotMessageHandlerError?.Invoke(maxBotClient, errorType, ex, cancellationToken);
         }

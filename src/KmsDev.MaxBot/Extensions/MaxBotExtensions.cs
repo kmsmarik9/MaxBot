@@ -8,26 +8,20 @@ namespace KmsDev.MaxBot
         public static IServiceCollection AddMaxBotSystem(this IServiceCollection serviceCollection, Action<MaxBotSystemConfigurer>? systemConfigurer = null) //, Action<MaxBotRequestsConfigurer>? requestConfigurer = null)
         {
             serviceCollection.AddSingleton<IMaxBotClientBuilder, MaxBotClientBuilderInternal>();
-            serviceCollection.AddSingleton<IMaxBotManager, MaxBotLongPollingManagerInternal>();
 
             {
-                var conf = new MaxBotSystemConfigurer();
+                var conf = new MaxBotSystemConfigurer(serviceCollection);
                 systemConfigurer?.Invoke(conf);
-                conf.ConfigureServices(serviceCollection);
+                conf.ConfigureServices();
             }
 
             {
-                var conf = new MaxBotRequestsConfigurer();
+                var conf = new MaxBotRequestsConfigurer(serviceCollection);
                 //requestConfigurer?.Invoke(requestsBuilder);
-                conf.ConfigureServices(serviceCollection);
+                conf.ConfigureServices();
             }
 
             return serviceCollection;
-        }
-
-        internal static bool IsPresent<T>(this T? value)
-        {
-            return value != null;
         }
     }
 }

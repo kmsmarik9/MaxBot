@@ -9,14 +9,14 @@
             _serviceProvider = serviceProvider;
         }
 
-        public IMaxBotClient Build(string token, string botHashSeed = "", CancellationToken cancellationToken = default)
+        public IMaxBotClient Build(string token, string botHashSecretKey = "", CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(token))
             {
                 throw new ArgumentException("empty", nameof(token));
             }
 
-            return new MaxBotClientInternal(_serviceProvider, token, botHashSeed, cancellationToken);
+            return new MaxBotClientInternal(_serviceProvider, token, botHashSecretKey, cancellationToken);
         }
     }
 }

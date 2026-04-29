@@ -12,6 +12,8 @@ namespace KmsDev.MaxBot.Requests
 {
     public sealed class MaxBotRequestsConfigurer
     {
+        public IServiceCollection Services { get; }
+
         private readonly Action<ResiliencePipelineBuilder<HttpResponseMessage>> _defaultRpbAction;
 
         private readonly Dictionary<string, Action<ResiliencePipelineBuilder<HttpResponseMessage>>> _systemRpbActionMap = [];
@@ -67,8 +69,10 @@ namespace KmsDev.MaxBot.Requests
             }
         };
 
-        internal MaxBotRequestsConfigurer()
+        internal MaxBotRequestsConfigurer(IServiceCollection services)
         {
+            Services = services;
+
             _defaultRpbAction = rpb =>
             {
                 rpb.AddRetry(_defaultRetryStrategyOptions);
@@ -79,7 +83,7 @@ namespace KmsDev.MaxBot.Requests
             InitSystemRpb();
         }
 
-        internal void ConfigureServices(IServiceCollection serviceCollection)
+        internal void ConfigureServices()
         {
             {
                 var defaultUri = new Uri("https://platform-api.max.ru/");
@@ -110,7 +114,7 @@ namespace KmsDev.MaxBot.Requests
                         .GetValue(null)!
                         .ToString()!;
 
-                    var httpClientBuilder = serviceCollection
+                    var httpClientBuilder = Services
                         .AddHttpClient(requestName, c =>
                         {
                             c.BaseAddress = defaultUri;
@@ -156,11 +160,11 @@ namespace KmsDev.MaxBot.Requests
 
                     if (t.IsAssignableTo(typeof(IMaxBotJsonResponse)))
                     {
-                        serviceCollection.AddKeyedSingleton(typeof(IMaxBotResponseParser), responseName, typeof(MaxBotJsonResponseParser));
+                        Services.AddKeyedSingleton(typeof(IMaxBotResponseParser), responseName, typeof(MaxBotJsonResponseParser));
                     }
                     else if (t.IsAssignableTo(typeof(IMaxBotXmlResponse)))
                     {
-                        serviceCollection.AddKeyedSingleton(typeof(IMaxBotResponseParser), responseName, typeof(MaxBotXmlResponseParser));
+                        Services.AddKeyedSingleton(typeof(IMaxBotResponseParser), responseName, typeof(MaxBotXmlResponseParser));
                     }
                     else
                     {

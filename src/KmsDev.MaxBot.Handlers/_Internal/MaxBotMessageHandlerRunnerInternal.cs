@@ -1,20 +1,29 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using KmsDev.MaxBot.Models;
+using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 
 namespace KmsDev.MaxBot.Handlers
 {
     internal class MaxBotMessageHandlerRunnerInternal : IMaxBotMessageHandlerRunner
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public MaxBotMessageHandlerRunnerInternal(IServiceProvider serviceProvider)
+        public MaxBotMessageHandlerRunnerInternal(IServiceScopeFactory serviceScopeFactory)
         {
-            _serviceProvider = serviceProvider;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
-        public async Task RunAsync(string handlersPrefix)
+        public async Task RunAsync(IMaxBotClient maxBotClient, string handlersPrefix, ApiInputUpdateMessagePolymorphContainer updateMessage, CancellationToken cancellationToken = default)
         {
-            var requestAccessor = _serviceProvider.GetRequiredKeyedService<IMaxBotMessageHandlerRequestAccessor>(handlersPrefix);
+            using var scope = _serviceScopeFactory.CreateScope();
+            var serviceProvider = scope.ServiceProvider;
+
+            var requestAccessor = serviceProvider.GetRequiredKeyedService<IMaxBotMessageHandlerRequestAccessor>(handlersPrefix);
+
+            if(!await requestAccessor.InitAsync(maxBotClient, handlersPrefix, updateMessage))
+            {
+                return;
+            }
 
             var serviceKey = string.Empty;
 
@@ -30,9 +39,7 @@ namespace KmsDev.MaxBot.Handlers
                 serviceKey = routePathBuilder.ToString();
             }
 
-            //var triggeredMessageHandlerStateContainer = _serviceProvider.GetRequiredService<TriggeredMessageHandlerStateContainer>();
-
-            var handlersResolveResult = _serviceProvider.GetKeyedService<MaxBotMessageHandlersResolveContainerInternal>(MaxBotMessageHandlersResolveContainerInternal.GenerateContainerName(serviceKey))
+            var handlersResolveResult = serviceProvider.GetKeyedService<MaxBotMessageHandlersResolveContainerInternal>(MaxBotMessageHandlersResolveContainerInternal.GenerateContainerName(serviceKey))
                 ?.Match(requestAccessor.RequestData);
 
             if(handlersResolveResult.HasValue)
@@ -40,13 +47,13 @@ namespace KmsDev.MaxBot.Handlers
                 var handlerServiceKey = handlersResolveResult.Value.ServiceKey;
                 var handlerRoute = handlersResolveResult.Value.Route;
 
-                var authService = _serviceProvider.GetKeyedService<IMaxBotMessageHandlerAuth>(handlerServiceKey);
+                var authService = serviceProvider.GetKeyedService<IMaxBotMessageHandlerAuth>(handlerServiceKey);
 
                 if(authService != null && await authService.AuthAsync(requestAccessor))
                 {
                     try
                     {
-                        var handler = _serviceProvider.GetKeyedService<IMaxBotMessageHandler>(handlerServiceKey);
+                        var handler = serviceProvider.GetKeyedService<IMaxBotMessageHandler>(handlerServiceKey);
 
                         if (handler != null)
                         {
@@ -55,7 +62,7 @@ namespace KmsDev.MaxBot.Handlers
                     }
                     catch(Exception ex)
                     {
-
+                        //TODO
                     }
                 }
             }

@@ -1,5 +1,4 @@
-﻿using KmsDev.MaxBot.Handlers;
-using KmsDev.MaxBot.Models;
+﻿using KmsDev.MaxBot.Models;
 using KmsDev.MaxBot.Requests;
 
 namespace KmsDev.MaxBot
@@ -11,7 +10,7 @@ namespace KmsDev.MaxBot
         public static Task StartLongPollingAsync(
             this IMaxBotClient maxBotClient, 
             Func<IMaxBotClient, ApiInputUpdateMessagePolymorphContainer, CancellationToken, Task> updateHandler,
-            Func<IMaxBotClient, MaxBotGetUpdatesErrorType, Exception, CancellationToken, Task>? errorHandler = null,
+            Func<IMaxBotClient, MaxBotLongPollingErrorType, Exception, CancellationToken, Task>? errorHandler = null,
             CancellationToken cancellationToken = default)
         {
             errorHandler ??= (_, _, _, _) => Task.CompletedTask;
@@ -39,8 +38,6 @@ namespace KmsDev.MaxBot
 
                         if(response.Updates.Count == 0)
                         {
-                            //TODO
-                            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                             continue;
                         }
 
@@ -54,7 +51,7 @@ namespace KmsDev.MaxBot
                     {
                         try
                         {
-                            await errorHandler(maxBotClient, MaxBotGetUpdatesErrorType.PollingError, ex, cancellationToken);
+                            await errorHandler(maxBotClient, MaxBotLongPollingErrorType.GetUpdatesError, ex, cancellationToken);
                         }
                         catch (OperationCanceledException)
                         {
@@ -76,7 +73,7 @@ namespace KmsDev.MaxBot
                         {
                             try
                             {
-                                await errorHandler(maxBotClient, MaxBotGetUpdatesErrorType.HandlerError, ex, cancellationToken);
+                                await errorHandler(maxBotClient, MaxBotLongPollingErrorType.HandlerError, ex, cancellationToken);
                             }
                             catch (OperationCanceledException)
                             {

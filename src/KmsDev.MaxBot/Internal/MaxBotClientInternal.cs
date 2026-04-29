@@ -14,21 +14,29 @@ namespace KmsDev.MaxBot
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly string _token;
-        private readonly ulong _botHash;
 
         public CancellationToken SelfCancellationToken { get; }
+        public string BotHash { get; }
 
-        public MaxBotClientInternal(IServiceProvider serviceProvider, string token, string secretKey = "", CancellationToken cancellationToken = default)
+        public MaxBotClientInternal(IServiceProvider serviceProvider, string token, string botHashSecretKey = "", CancellationToken cancellationToken = default)
         {
             _serviceProvider = serviceProvider;
             _token = token;
-            _botHash = System.IO.Hashing.XxHash3.HashToUInt64(Encoding.UTF8.GetBytes(_token), unchecked((long)System.IO.Hashing.XxHash128.HashToUInt128(Encoding.UTF8.GetBytes(secretKey))));
             SelfCancellationToken = cancellationToken;
+
+            {
+                var secretKeyBytes = Encoding.UTF8.GetBytes(botHashSecretKey ?? string.Empty);
+                using var hmac = new HMACSHA256(secretKeyBytes);
+                var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(token));
+
+                BotHash = Convert.ToBase64String(hashBytes)
+                    .Replace("+", "")
+                    .Replace("/", "")
+                    .Replace("=", "");
+            }
 
             Api = new(this);
         }
-
-        public ulong BotHash { get { return _botHash; } }
 
         public MaxBotClientApiContainer Api { get; }
 

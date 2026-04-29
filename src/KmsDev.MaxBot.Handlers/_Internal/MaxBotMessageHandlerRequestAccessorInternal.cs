@@ -65,11 +65,6 @@ namespace KmsDev.MaxBot.Handlers
 
         private static long? GetUserId(ApiInputUpdateMessagePolymorphContainer updateMessage)
         {
-            if (!updateMessage.IsPresent())
-            {
-                return null;
-            }
-
             return updateMessage switch
             {
                 { MessageCreated: ApiInputUpdateMessageCreated mc } => mc.Message.Sender?.UserId,

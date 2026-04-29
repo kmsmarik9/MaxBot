@@ -7,7 +7,7 @@ namespace KmsDev.MaxBot.Handlers
     {
         public static IServiceCollection AddMaxBotMessageHandlerSystem(this IServiceCollection serviceCollections, Action<MaxBotMessageHandlerSystemConfig> configAction)
         {
-            serviceCollections.AddScoped<IMaxBotMessageHandlerRunner, MaxBotMessageHandlerRunnerInternal>();
+            serviceCollections.AddSingleton<IMaxBotMessageHandlerRunner, MaxBotMessageHandlerRunnerInternal>();
 
             var cfg = new MaxBotMessageHandlerSystemConfig(serviceCollections);
 

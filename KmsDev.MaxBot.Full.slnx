@@ -1,3 +1,24 @@
 <Solution>
-  <Project Path="KmsDev.MaxBot.Full.csproj" />
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="LamaDebug" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Folder Name="/docs/">
+    <File Path=".dockerignore" />
+    <File Path=".gitignore" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/KmsDev.MaxBot.Handlers/KmsDev.MaxBot.Handlers.csproj" Id="b9428dc5-042a-4a5e-ac3a-0dcda7879090">
+      <BuildType Solution="LamaDebug|*" Project="Release" />
+    </Project>
+    <Project Path="src/KmsDev.MaxBot.LongPollingManager/KmsDev.MaxBot.LongPollingManager.csproj" Id="351de2c0-07de-4102-babb-6c76ec5ba3dc">
+      <BuildType Solution="LamaDebug|*" Project="Release" />
+    </Project>
+    <Project Path="src/KmsDev.MaxBot/KmsDev.MaxBot.csproj" Id="033d3958-738e-4f93-9cf0-3158eeb6b344">
+      <BuildType Solution="LamaDebug|*" Project="Release" />
+    </Project>
+  </Folder>
 </Solution>

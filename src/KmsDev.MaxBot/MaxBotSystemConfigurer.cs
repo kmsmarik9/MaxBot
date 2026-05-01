@@ -18,9 +18,9 @@ namespace KmsDev.MaxBot
         /// <br/>
         /// </summary>
         /// <returns></returns>
-        public MaxBotSystemConfigurer AddSingletonClient(string botToken, string? botHashSeed)
+        public MaxBotSystemConfigurer AddSingletonClient(string botToken, string? botHashSecretKey)
         {
-            _singletonOptions = (botToken, botHashSeed);
+            _singletonOptions = (botToken, botHashSecretKey);
             return this;
         }
 

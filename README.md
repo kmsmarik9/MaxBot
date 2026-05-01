@@ -3,7 +3,6 @@
 ![.NET](https://img.shields.io/badge/.NET-8.0-purple)
 [![NuGet](https://img.shields.io/nuget/v/KmsDev.MaxBot)](https://www.nuget.org/packages/KmsDev.MaxBot)
 ![License](https://img.shields.io/github/license/kmsmarik9/maxbot)
-<!-- ![Build](https://github.com/kmsmarik9/maxbot/actions/workflows/publish.yml/badge.svg) -->
 
 # Быстрый старт
 ### Подключение пакета
@@ -18,49 +17,25 @@ using KmsDev.MaxBot;
 serviceCollections.AddMaxBotSystem();
 ```
 
-Если в системе пралируется 1 бот, то можно использовать AddSingletonClient
-- добавляет singleton `IMaxBotClient`
-- если задать `handlersOptions`, то будет так же добавлен LongPollingManager
-
-пример:
+Если в системе пралируется 1 бот, то можно использовать `AddSingletonClient`
 ```csharp
+//бот будет доступен по интерфейсу IMaxBotClient
 serviceCollections.AddMaxBotSystem(sc =>
 {
-    sc.AddSingletonClient((БОТ_ТОКЕН, null), ("default_routes", new MaxBotSystemConfigurer.LongPollingManagerOptions()));
+    sc.AddSingletonClient(БОТ_ТОКЕН);
 });
 ```
 
-### Создание MaxBotClient
+### Ручное создание MaxBotClient
 ```csharp
 //получить client builder
 var maxBotClientBuilder = serviceProvider.GetRequiredService<IMaxBotClientBuilder>();
 
 //создание бота:
-//на основе БОТ_ТОКЕН создается `botHash` с использованием `System.IO.Hashing.XxHash3.HashToUInt64`
-//(опционально - рекомендуется вторым параметром добавить `seed` фразу)
+//на основе БОТ_ТОКЕН создается `botHash` с использованием `HMACSHA256`
+//(опционально - рекомендуется вторым параметром добавить `botHashSecretKey`)
 var maxBot = maxBotClientBuilder.Build(БОТ_ТОКЕН);
 ```
-
-### LongPolling
-Вызов `AddLongPollingManager` добавляет в DI интерфейс `IMaxBotManager`
-```csharp
-using KmsDev.MaxBot;
-
-//подключение основной системы
-serviceCollections.AddMaxBotSystem(sc =>
-{
-    //подключение LongPolling
-    sc.AddLongPollingManager();
-});
-```
-Так же ознакомьтесь с [Route Handlers](Handlers/README.md)
-
-### WebHook
-- В разработке
-
-### Route Handler
-[Информация по Route Handlers](Handlers/README.md)
-
 
 ## Использование api
 Бот разделен на секции в соотвествии с [api документацией](https://dev.max.ru/docs-api)
@@ -95,9 +70,16 @@ var response = await maxBot.Api.Messages.SendMessageAsync(new SendMessageRequest
 ));
 ```
 
+### Route Handler
+[В отдельном проекте KmsDev.MaxBot.Handlers](src/KmsDev.MaxBot.Handlers/README.md)
+
+### LongPolling + Manager
+[В отдельном проекте KmsDev.MaxBot.LongPollingManager](src/KmsDev.MaxBot.LongPollingManager/README.md)
+
 ## Системная информация
 ### Подключен пакет `Microsoft.Extensions.Http.Resilience`
 - для всех ботов и api запросов используется один RateLimiter pipeline для ограничения в 30rps к серверу 
+- для LongPolling запроса добавлен RateLimiter с 2rps индивидуально для каждого бота (ограничение со стороны Api начиная с 15.05.2026)
 - для каждого api запроса индивидуально добавлен Retry и Timeout pipeline (можно задавать свои лимиты при вызове api)
 - для некоторых запросов (например SendMessage с 'attachment.not.ready') используется свой уникальный pipeline, детально в `MaxBotRequestsConfigurer`
 

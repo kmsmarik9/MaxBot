@@ -3,6 +3,7 @@ using KmsDev.MaxBot.Models;
 using KmsDev.MaxBot.Requests;
 using KmsDev.MaxBot.Responses;
 using Microsoft.Extensions.DependencyInjection;
+using Polly;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -12,6 +13,8 @@ namespace KmsDev.MaxBot
 {
     internal class MaxBotClientInternal : IMaxBotClient
     {
+        public static readonly HttpRequestOptionsKey<string> BotHashResiliencePropertyKey = new(nameof(BotHashResiliencePropertyKey));
+
         private readonly IServiceProvider _serviceProvider;
         private readonly string _token;
 
@@ -121,6 +124,7 @@ namespace KmsDev.MaxBot
 
             try
             {
+                httpRequestMessage.Options.Set(BotHashResiliencePropertyKey, BotHash);
                 MaxBotHttpRequestOptionsKeyForResilienceSettingsCache<TResilienceSettings>.SetSettings(httpRequestMessage.Options, resilienceSettings);
 
                 using var httpResponse = await _serviceProvider

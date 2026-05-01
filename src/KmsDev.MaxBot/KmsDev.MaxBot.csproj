@@ -9,7 +9,7 @@
 		<PackageId>KmsDev.MaxBot</PackageId>
 		<Version>1.0.0</Version>
 		<Authors>KmsDev</Authors>
-		<Description>MaxBot Client + Update Message Handlers</Description>
+		<Description>MaxBot Client Core</Description>
 		<PackageProjectUrl>https://github.com/kmsmarik9/maxbot</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<IncludeSymbols>true</IncludeSymbols>

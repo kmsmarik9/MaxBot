@@ -44,7 +44,7 @@ namespace KmsDev.MaxBot.LongPollingManager
                         var response = await maxBotClient.SendRequestAsync(request, new MaxBotRequestResilienceDefaultSettings
                         {
                             EnableRetryStrategy = false,
-                            Timeout = TimeSpan.FromHours(1)
+                            Timeout = TimeSpan.FromMinutes(5)
                         }, cancellationToken);
 
                         request.Marker = response.Marker;
@@ -121,11 +121,11 @@ namespace KmsDev.MaxBot.LongPollingManager
         /// <param name="services"></param>
         /// <param name="botSettings"></param>
         /// <returns></returns>
-        public static IServiceCollection AddMaxBotSystemSingletonWithLongPolling(this IServiceCollection services, (string Token, string? HashSeed) botSettings)
+        public static IServiceCollection AddMaxBotSingletonWithLongPolling(this IServiceCollection services, (string Token, string? HashSecretKey) botSettings)
         {
             services.AddMaxBotSystem(sc =>
             {
-                sc.AddSingletonClient(botSettings.Token, botSettings.HashSeed);
+                sc.AddSingletonClient(botSettings.Token, botSettings.HashSecretKey);
                 sc.AddLongPollingManager();
             });
 
@@ -145,11 +145,11 @@ namespace KmsDev.MaxBot.LongPollingManager
         /// <param name="botSettings"></param>
         /// <param name="handlersBuilder"></param>
         /// <returns></returns>
-        public static IServiceCollection AddMaxBotSystemSingletonWithLongPolling<TUserState, TAuth>(this IServiceCollection services, (string Token, string? HashSeed) botSettings, MaxBotMessageHandlersRouteBuilder<TUserState, TAuth> handlersBuilder)
+        public static IServiceCollection AddMaxBotSingletonWithLongPolling<TUserState, TAuth>(this IServiceCollection services, (string Token, string? HashSeed) botSettings, MaxBotMessageHandlersRouteBuilder<TUserState, TAuth> handlersBuilder)
             where TUserState : class, IMaxBotMessageHandlerUserState, new()
             where TAuth : IMaxBotMessageHandlerAuth
         {
-            services.AddMaxBotSystemSingletonWithLongPolling(botSettings);
+            services.AddMaxBotSingletonWithLongPolling(botSettings);
 
             services.AddMaxBotMessageHandlerSystem(c =>
             {

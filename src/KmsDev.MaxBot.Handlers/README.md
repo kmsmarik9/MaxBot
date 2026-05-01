@@ -1,3 +1,13 @@
+![.NET](https://img.shields.io/badge/.NET-8.0-purple)
+[![NuGet](https://img.shields.io/nuget/v/KmsDev.MaxBot)](https://www.nuget.org/packages/KmsDev.MaxBot.LongPollingManager)
+![License](https://img.shields.io/github/license/kmsmarik9/maxbot)
+
+# Быстрый старт
+### Подключение пакета
+```
+dotnet add package KmsDev.MaxBot.Handlers
+```
+
 ## Подключение Route Handlers
 ```csharp
 //подключение Route Handlers
@@ -128,3 +138,6 @@ public class TestMaxBotHandlersRouteBuilder2 : MaxBotMessageHandlersRouteBuilder
     }
 }
 ```
+
+Так же ознакомьтесь с [KmsDev.MaxBot.LongPollingManager](../KmsDev.MaxBot.LongPollingManager/README.md)
+

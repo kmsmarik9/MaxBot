@@ -3,8 +3,8 @@ using KmsDev.MaxBot.Responses;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
+using Polly.RateLimiting;
 using Polly.Retry;
-using Polly.Timeout;
 using System.Reflection;
 using System.Threading.RateLimiting;
 
@@ -19,7 +19,16 @@ namespace KmsDev.MaxBot.Requests
         private readonly Dictionary<string, Action<ResiliencePipelineBuilder<HttpResponseMessage>>> _systemRpbActionMap = [];
         private readonly Dictionary<string, Action<ResiliencePipelineBuilder<HttpResponseMessage>>> _customRpbActionMap = [];
 
-        private static readonly HttpRetryStrategyOptions _defaultRetryStrategyOptions = new()
+        public static readonly RateLimiter DefaultRateLimiterForApi = new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = 30,
+            QueueLimit = 10,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            Window = TimeSpan.FromSeconds(1),
+            SegmentsPerWindow = 5
+        });
+
+        public static readonly HttpRetryStrategyOptions DefaultRetryStrategyOptions = new()
         {
             BackoffType = DelayBackoffType.Exponential,
             Delay = TimeSpan.FromSeconds(1),
@@ -34,8 +43,10 @@ namespace KmsDev.MaxBot.Requests
                         return args.Outcome switch
                         {
                             { Result.IsSuccessStatusCode: false } => PredicateResult.True(),
-                            { Exception: HttpRequestException } => PredicateResult.True(),
-                            { Exception: TimeoutRejectedException } => PredicateResult.True(),
+                            //любые ошибки
+                            { Exception: Exception } => PredicateResult.True(),
+                            //{ Exception: HttpRequestException } => PredicateResult.True(),
+                            //{ Exception: TimeoutRejectedException } => PredicateResult.True(),
                             _ => PredicateResult.False()
                         };
                     }
@@ -55,7 +66,7 @@ namespace KmsDev.MaxBot.Requests
             }
         };
 
-        private static readonly HttpTimeoutStrategyOptions _defaultTimeoutStrategyOptions = new()
+        public static readonly HttpTimeoutStrategyOptions DefaultTimeoutStrategyOptions = new()
         {
             Timeout = TimeSpan.FromSeconds(30),
             TimeoutGenerator = static args =>
@@ -75,9 +86,9 @@ namespace KmsDev.MaxBot.Requests
 
             _defaultRpbAction = rpb =>
             {
-                rpb.AddRetry(_defaultRetryStrategyOptions);
-
-                rpb.AddTimeout(_defaultTimeoutStrategyOptions);
+                rpb.AddRetry(DefaultRetryStrategyOptions);
+                rpb.AddRateLimiter(DefaultRateLimiterForApi);
+                rpb.AddTimeout(DefaultTimeoutStrategyOptions);
             };
 
             InitSystemRpb();
@@ -87,18 +98,6 @@ namespace KmsDev.MaxBot.Requests
         {
             {
                 var defaultUri = new Uri("https://platform-api.max.ru/");
-
-                var allClientsRateLimiterPipeline = new ResiliencePipelineBuilder()
-                    .AddRateLimiter(new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions
-                    {
-                        PermitLimit = 30,
-                        QueueLimit = 0, //не копим сообщения, перекладываем на Retry если он установлен
-                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                        Window = TimeSpan.FromSeconds(1),
-                        SegmentsPerWindow = 5
-                    }))
-                    .Build();
-
 
                 var requestTypes = AppDomain.CurrentDomain
                     .GetAssemblies()
@@ -136,7 +135,6 @@ namespace KmsDev.MaxBot.Requests
 
                         httpClientBuilder.AddResilienceHandler($"maxbot_resilience_handler:{requestName}", rpb =>
                         {
-                            rpb.AddPipeline(allClientsRateLimiterPipeline);
                             finalRpbAction(rpb);
                         });
                     }
@@ -187,7 +185,51 @@ namespace KmsDev.MaxBot.Requests
 
         private void InitSystemRpb()
         {
-            #region MaxBotSendMessageRequest
+            #region GetUpdatesRequest, С 11.05.2026 вводят ограничение на 2rps для LongPolling
+            {
+                _systemRpbActionMap[MaxBotRequestNameCache<GetUpdatesRequest>.Value] = rpb =>
+                {
+                    rpb.AddRetry(DefaultRetryStrategyOptions);
+
+                    rpb.AddRateLimiter(DefaultRateLimiterForApi);
+
+                    //с 15.05.2026 разрешено 2rps на бота
+                    {
+                        var partitionedBotRateLimiter = PartitionedRateLimiter.Create<ResilienceContext, string>(context =>
+                        {
+                            var partitionKey = "default";
+
+                            var requestMessage = context.GetRequestMessage();
+                            if (requestMessage != null)
+                            {
+                                if(requestMessage.Options.TryGetValue(MaxBotClientInternal.BotHashResiliencePropertyKey, out var key))
+                                {
+                                    partitionKey = key;
+                                }
+                            }
+
+                            return RateLimitPartition.GetSlidingWindowLimiter(partitionKey!, _ => new SlidingWindowRateLimiterOptions
+                            {
+                                PermitLimit = 2,
+                                QueueLimit = 10,
+                                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                                SegmentsPerWindow = 2,
+                                Window = TimeSpan.FromSeconds(1)
+                            });
+                        });
+
+                        rpb.AddRateLimiter(new RateLimiterStrategyOptions
+                        {
+                            RateLimiter = rlArgs => partitionedBotRateLimiter.AcquireAsync(rlArgs.Context, 1, rlArgs.Context.CancellationToken)
+                        });
+                    }
+
+                    rpb.AddTimeout(DefaultTimeoutStrategyOptions);
+                };
+            }
+            #endregion
+
+            #region SendMessageRequest
             _systemRpbActionMap[MaxBotRequestNameCache<SendMessageRequest>.Value] = rpb =>
             {
                 rpb.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
@@ -204,9 +246,11 @@ namespace KmsDev.MaxBot.Requests
                             {
                                 return args.Outcome switch
                                 {
+                                    // MaxBotAttachmentNotReadyException обрабатывает другая стратегия
+                                    { Exception: MaxBotAttachmentNotReadyException } => PredicateResult.False(),
+
                                     { Result.IsSuccessStatusCode: false } => PredicateResult.True(),
-                                    { Exception: HttpRequestException } => PredicateResult.True(),
-                                    { Exception: TimeoutRejectedException } => PredicateResult.True(),
+                                    { Exception: Exception } => PredicateResult.True(),
                                     _ => PredicateResult.False()
                                 };
                             }
@@ -266,20 +310,22 @@ namespace KmsDev.MaxBot.Requests
                 rpb.AddStrategy(context => new SendMessageRequest.ThrowIfAttachmentNotReadyStrategy());
                 #endregion
 
-                rpb.AddTimeout(_defaultTimeoutStrategyOptions);
+                rpb.AddRateLimiter(DefaultRateLimiterForApi);
+
+                rpb.AddTimeout(DefaultTimeoutStrategyOptions);
             };
             #endregion
 
-            #region MaxBotUploadImageRequest
+            #region UploadImageDataRequest
             _systemRpbActionMap[MaxBotRequestNameCache<UploadImageDataRequest>.Value] = rpb =>
             {
                 //кастомная стратегия для 200 статуса
                 //обработка до retry, т.к. это мы отправили кривой файл
                 rpb.AddStrategy(context => new UploadImageDataRequest.ThrowIf200StatusWithErrorCodeStrategy());
 
-                rpb.AddRetry(_defaultRetryStrategyOptions);
+                rpb.AddRetry(DefaultRetryStrategyOptions);
 
-                rpb.AddTimeout(_defaultTimeoutStrategyOptions);
+                rpb.AddTimeout(DefaultTimeoutStrategyOptions);
             };
             #endregion
         }

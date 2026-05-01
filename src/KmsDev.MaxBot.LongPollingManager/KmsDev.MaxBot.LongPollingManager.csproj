@@ -1,17 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 
-	<ItemGroup>
-		<PackageReference Include="Metalama.Extensions.DependencyInjection" Version="2026.0.20" />
-		<PackageReference Include="Metalama.Framework" Version="2026.0.20" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
-		<PackageReference Include="OneOf" Version="3.0.271" />
-	</ItemGroup>
+		<PackageId>KmsDev.MaxBot.LongPollingManager</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>KmsDev</Authors>
+		<Description>MaxBot Client LongPolling Manager Extensions</Description>
+		<PackageProjectUrl>https://github.com/kmsmarik9/maxbot</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\KmsDev.MaxBot.Handlers\KmsDev.MaxBot.Handlers.csproj" >

@@ -4,7 +4,7 @@ namespace KmsDev.MaxBot.Models
 {
     [JsonConverter(typeof(MaxBotPolymorphContainerDeserializeJsonConverter<ApiInputUpdateMessagePolymorphContainer>))]
     [MaxBotSourceGeneratePolymorphContainer("update_type")]
-    public partial class ApiInputUpdateMessagePolymorphContainer
+    public partial class ApiInputUpdateMessagePolymorphContainer : IMaxBotPolymorphContainer
     {
         [MaxBotSourceGeneratePolymorphItem("message_created")]
         public readonly ApiInputUpdateMessageCreated? MessageCreated;
@@ -50,5 +50,7 @@ namespace KmsDev.MaxBot.Models
 
         [MaxBotSourceGeneratePolymorphItem("chat_title_changed")]
         public readonly ApiInputUpdateChatTitleChanged? ChatTitleChanged;
+
+        public string? UnknowData { get; }
     }
 }

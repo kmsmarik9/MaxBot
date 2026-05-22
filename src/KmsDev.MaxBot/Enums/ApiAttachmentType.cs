@@ -2,8 +2,8 @@
 
 namespace KmsDev.MaxBot
 {
-    [JsonConverter(typeof(EnumByStringConverter<ApiOutputAttachmentType>))]
-    public enum ApiOutputAttachmentType
+    [JsonConverter(typeof(EnumByStringConverter<ApiAttachmentType>))]
+    public enum ApiAttachmentType
     {
         [EnumValueByString("image")]
         Image = 10,

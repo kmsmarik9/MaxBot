@@ -2,8 +2,8 @@
 
 namespace KmsDev.MaxBot
 {
-    [JsonConverter(typeof(EnumByStringConverter<ApiOutputAttachmentButtonType>))]
-    public enum ApiOutputAttachmentButtonType
+    [JsonConverter(typeof(EnumByStringConverter<ApiAttachmentButtonType>))]
+    public enum ApiAttachmentButtonType
     {
         //[EnumValueByString("callback")]
         //Callback = 10,

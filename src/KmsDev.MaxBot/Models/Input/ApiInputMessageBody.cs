@@ -22,8 +22,13 @@ namespace KmsDev.MaxBot.Models
         [JsonPropertyName("text")]
         public string? Text { get; set; }
 
+        [JsonInclude]
+        [JsonPropertyName("attachments")]
+        internal IReadOnlyList<ApiInputMessageAttachmentPolymorphContainer> _attachmentsContainer { get; init; } = [];
 
-        //TODO attachments
+        [JsonIgnore]
+        public ApiInputMessageAttachmentPolymorphContainer? AttachmentContainer { get { return _attachmentsContainer.FirstOrDefault(); }  }
+
         //TODO markup
     }
 }

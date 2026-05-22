@@ -145,7 +145,7 @@ namespace KmsDev.MaxBot.LongPollingManager
         /// <param name="botSettings"></param>
         /// <param name="handlersBuilder"></param>
         /// <returns></returns>
-        public static IServiceCollection AddMaxBotSingletonWithLongPolling<TUserState, TAuth>(this IServiceCollection services, (string Token, string? HashSeed) botSettings, MaxBotMessageHandlersRouteBuilder<TUserState, TAuth> handlersBuilder)
+        public static IServiceCollection AddMaxBotSingletonWithLongPolling<TUserState, TAuth>(this IServiceCollection services, (string Token, string? HashSecretKey) botSettings, MaxBotMessageHandlersRouteBuilder<TUserState, TAuth> handlersBuilder)
             where TUserState : class, IMaxBotMessageHandlerUserState, new()
             where TAuth : IMaxBotMessageHandlerAuth
         {

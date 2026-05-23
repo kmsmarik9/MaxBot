@@ -73,6 +73,25 @@ var response = await maxBot.Api.Messages.SendMessageAsync(new SendMessageRequest
 ### Route Handler
 [В отдельном проекте KmsDev.MaxBot.Handlers](src/KmsDev.MaxBot.Handlers/README.md)
 
+### Webhook
+Пример подписки на обновления
+```csharp
+
+host.MapPost("max/webhook", async (ApiInputUpdateMessagePolymorphContainer container) =>
+{
+    return Results.Ok();
+});
+
+...
+
+await maxBot.Api.Subscriptions.SetSubscriptionAsync(new SetSubscriptionRequest
+{
+    Secret = ..., // Cекрет, который должен быть отправлен в заголовке X-Max-Bot-Api-Secret
+    UpdateTypes = [...], // Список типов событий
+    Url = "https://.../max/webhook" // URL HTTPS-endpoint вашего бота. Должен начинаться с https://
+})
+```
+
 ### LongPolling + Manager
 [В отдельном проекте KmsDev.MaxBot.LongPollingManager](src/KmsDev.MaxBot.LongPollingManager/README.md)
 

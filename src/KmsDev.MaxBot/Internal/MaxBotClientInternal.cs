@@ -7,6 +7,7 @@ using Polly;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Web;
 
 namespace KmsDev.MaxBot
@@ -16,15 +17,17 @@ namespace KmsDev.MaxBot
         public static readonly HttpRequestOptionsKey<string> BotHashResiliencePropertyKey = new(nameof(BotHashResiliencePropertyKey));
 
         private readonly IServiceProvider _serviceProvider;
-        private readonly string _token;
 
         public CancellationToken SelfCancellationToken { get; }
+
+        [JsonIgnore]
+        public string Token { get; }
         public string BotHash { get; }
 
         public MaxBotClientInternal(IServiceProvider serviceProvider, string token, string botHashSecretKey = "", CancellationToken cancellationToken = default)
         {
             _serviceProvider = serviceProvider;
-            _token = token;
+            Token = token;
             SelfCancellationToken = cancellationToken;
 
             {
@@ -74,7 +77,7 @@ namespace KmsDev.MaxBot
                     list.Sort((a, b) => a.CompareTo(b));
 
                     using var secretHmac = new HMACSHA256(Encoding.UTF8.GetBytes("WebAppData"));
-                    var secketKey = secretHmac.ComputeHash(Encoding.UTF8.GetBytes(_token));
+                    var secketKey = secretHmac.ComputeHash(Encoding.UTF8.GetBytes(Token));
 
                     using var initDataHmac = new HMACSHA256(secketKey);
                     var calculatedHash = BitConverter.ToString(initDataHmac.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", list)))).Replace("-", "");
@@ -119,7 +122,7 @@ namespace KmsDev.MaxBot
 
             if (requestSettings.IncludeAuthorizationToken)
             {
-                httpRequestMessage.Headers.TryAddWithoutValidation("Authorization", _token);
+                httpRequestMessage.Headers.TryAddWithoutValidation("Authorization", Token);
             }
 
             try
@@ -153,11 +156,6 @@ namespace KmsDev.MaxBot
             {
                 throw new MaxBotRequestException($"MaxBot request fail. {request.GetType().Name}: {ex.Message}", ex);
             }
-        }
-
-        public async Task UploadFile(CancellationToken cancellationToken = default)
-        {
-
         }
     }
 }

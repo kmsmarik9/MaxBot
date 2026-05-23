@@ -6,6 +6,8 @@ namespace KmsDev.MaxBot
 {
     public interface IMaxBotClient
     {
+        internal string Token { get; }
+
         string BotHash { get; }
 
         CancellationToken SelfCancellationToken { get; }

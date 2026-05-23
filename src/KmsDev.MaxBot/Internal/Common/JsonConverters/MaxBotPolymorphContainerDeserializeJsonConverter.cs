@@ -1,11 +1,12 @@
-﻿using System.Reflection;
+﻿using KmsDev.MaxBot.Models;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace KmsDev.MaxBot
 {
     public class MaxBotPolymorphContainerDeserializeJsonConverter<T> : JsonConverter<T>
-        where T : new()
+        where T : IMaxBotPolymorphContainer, new()
     {
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -20,16 +21,17 @@ namespace KmsDev.MaxBot
 
                 var discriminator = discriminatorProp.GetString()?.ToLowerInvariant();
 
-                if (string.IsNullOrWhiteSpace(discriminator) || !MaxBotPolymorphContainerJsonConverterCache<T>.Map.TryGetValue(discriminator, out var field))
-                {
-                    throw new JsonException($"Unknown discriminator value '{discriminator}'");
-                }
-
-                var value = root.Deserialize(field.FieldType, options);
-
                 var result = new T();
 
-                field.SetValue(result, value);
+                if (string.IsNullOrWhiteSpace(discriminator) || !MaxBotPolymorphContainerJsonConverterCache<T>.Map.TryGetValue(discriminator, out var field))
+                {
+                    MaxBotPolymorphContainerJsonConverterCache<T>.UnknowDataProperty.SetValue(result, root.GetRawText());
+                }
+                else
+                {
+                    var value = root.Deserialize(field.FieldType, options);
+                    field.SetValue(result, value);
+                }
                 
                 return result;
             }
@@ -42,9 +44,11 @@ namespace KmsDev.MaxBot
     }
 
     internal static class MaxBotPolymorphContainerJsonConverterCache<T>
+        where T : IMaxBotPolymorphContainer
     {
         public static readonly string DiscriminatorField;
         public static readonly Dictionary<string, FieldInfo> Map;
+        public static readonly PropertyInfo UnknowDataProperty;
 
         static MaxBotPolymorphContainerJsonConverterCache()
         {
@@ -67,6 +71,8 @@ namespace KmsDev.MaxBot
                     x => x.Attr!.DiscriminatorFieldValue,
                     x => x.Field
                 );
+
+            UnknowDataProperty = type.GetProperty(nameof(IMaxBotPolymorphContainer.UnknowData), BindingFlags.Instance | BindingFlags.Public)!;
         }
     }
 }

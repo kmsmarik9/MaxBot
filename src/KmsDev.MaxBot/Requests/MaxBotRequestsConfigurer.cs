@@ -94,10 +94,10 @@ namespace KmsDev.MaxBot.Requests
             InitSystemRpb();
         }
 
-        internal void ConfigureServices()
+        internal void ConfigureServices(Uri baseAddress)
         {
             {
-                var defaultUri = new Uri("https://platform-api.max.ru/");
+                var defaultUri = baseAddress;
 
                 var requestTypes = AppDomain.CurrentDomain
                     .GetAssemblies()

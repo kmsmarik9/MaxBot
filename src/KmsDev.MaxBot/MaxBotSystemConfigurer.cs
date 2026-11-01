@@ -4,13 +4,48 @@ namespace KmsDev.MaxBot
 {
     public class MaxBotSystemConfigurer
     {
+        public static readonly Uri DefaultBaseAddress = new("https://platform-api2.max.ru/");
+
         public IServiceCollection Services { get; }
+
+        /// <summary>
+        /// Базовый адрес API. По умолчанию <see cref="DefaultBaseAddress"/>.
+        /// </summary>
+        public Uri BaseAddress { get; private set; } = DefaultBaseAddress;
 
         private (string BotToken, string? HashSeed)? _singletonOptions = null;
 
         public MaxBotSystemConfigurer(IServiceCollection services)
         {
             Services = services;
+        }
+
+        /// <summary>
+        /// Базовый URL для запросов к API. Относительные пути методов дописываются к нему.
+        /// <br/>
+        /// Если завершающего <c>/</c> нет, он будет добавлен.
+        /// </summary>
+        public MaxBotSystemConfigurer SetBaseAddress(string baseAddress)
+        {
+            if (string.IsNullOrWhiteSpace(baseAddress))
+            {
+                throw new ArgumentException("empty", nameof(baseAddress));
+            }
+
+            var normalized = baseAddress.Trim();
+            if (!normalized.EndsWith('/'))
+            {
+                normalized += "/";
+            }
+
+            if (!Uri.TryCreate(normalized, UriKind.Absolute, out var uri)
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                throw new ArgumentException("absolute http or https uri required", nameof(baseAddress));
+            }
+
+            BaseAddress = uri;
+            return this;
         }
 
         /// <summary>

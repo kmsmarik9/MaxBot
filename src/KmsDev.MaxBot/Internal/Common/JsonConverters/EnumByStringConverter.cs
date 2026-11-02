@@ -41,14 +41,17 @@ namespace KmsDev.MaxBot
 
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {
+            writer.WriteStringValue(ToWire(value));
+        }
+
+        public static string ToWire(T value)
+        {
             if (_enumToString.TryGetValue(value, out var stringValue))
             {
-                writer.WriteStringValue(stringValue);
+                return stringValue;
             }
-            else
-            {
-                writer.WriteStringValue(value.ToString());
-            }
+
+            return value.ToString();
         }
     }
 }

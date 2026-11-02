@@ -18,6 +18,15 @@ namespace KmsDev.MaxBot.Models
         [MaxBotSourceGeneratePolymorphItem("message_removed")]
         public readonly ApiInputUpdateMessageRemoved? MessageRemoved;
 
+        [MaxBotSourceGeneratePolymorphItem("comment_created")]
+        public readonly ApiInputUpdateCommentCreated? CommentCreated;
+
+        [MaxBotSourceGeneratePolymorphItem("comment_edited")]
+        public readonly ApiInputUpdateCommentEdited? CommentEdited;
+
+        [MaxBotSourceGeneratePolymorphItem("comment_removed")]
+        public readonly ApiInputUpdateCommentRemoved? CommentRemoved;
+
         [MaxBotSourceGeneratePolymorphItem("bot_added")]
         public readonly ApiInputUpdateBotAdded? BotAdded;
 
@@ -51,6 +60,9 @@ namespace KmsDev.MaxBot.Models
         [MaxBotSourceGeneratePolymorphItem("chat_title_changed")]
         public readonly ApiInputUpdateChatTitleChanged? ChatTitleChanged;
 
-        public string? UnknowData { get; }
+        [MaxBotSourceGeneratePolymorphItem("bot_admin_permissions_changed")]
+        public readonly ApiInputUpdateBotAdminPermissionsChanged? BotAdminPermissionsChanged;
+
+        public string? UnknowData { get; private set; }
     }
 }

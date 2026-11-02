@@ -17,13 +17,15 @@ namespace KmsDev.MaxBot.LongPollingManager
         /// <param name="errorHandler"></param>
         /// <param name="requestOptions"></param>
         /// <param name="cancellationToken"></param>
+        /// <param name="timeoutSeconds">Query-параметр <c>timeout</c> метода GET /updates (0-90). Не заменяет таймаут HttpClient.</param>
         /// <returns></returns>
         public static Task StartLongPollingAsync(
             this IMaxBotClient maxBotClient,
             Func<IMaxBotClient, ApiInputUpdateMessagePolymorphContainer, CancellationToken, Task> updateHandler,
             Func<IMaxBotClient, MaxBotLongPollingErrorType, Exception, CancellationToken, Task>? errorHandler = null,
             (int Limit, long? StartupMarket)? requestOptions = null,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            int? timeoutSeconds = null)
         {
             errorHandler ??= (_, _, _, _) => Task.CompletedTask;
 
@@ -32,7 +34,8 @@ namespace KmsDev.MaxBot.LongPollingManager
                 var request = new GetUpdatesRequest()
                 {
                     Limit = requestOptions?.Limit ?? 10,
-                    Marker = requestOptions?.StartupMarket
+                    Marker = requestOptions?.StartupMarket,
+                    Timeout = timeoutSeconds
                 };
 
                 while (!cancellationToken.IsCancellationRequested)

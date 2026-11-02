@@ -45,9 +45,7 @@ var maxBot = maxBotClientBuilder.Build(БОТ_ТОКЕН);
 - `Api.Subscriptions`
 - `Api.Upload`
 - `Api.Messages`
-
-в разработке:
-- `Api.Chats`
+- `Api.Chats` (ручное тестирование каждой endpoint не проводилось)
 
 пример использования api:
 ```csharp

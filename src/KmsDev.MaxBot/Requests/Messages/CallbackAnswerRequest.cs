@@ -16,6 +16,12 @@ namespace KmsDev.MaxBot.Requests
         public string CallbackId { get; set; }
 
         /// <summary>
+        /// Отключить превью ссылок в обновлённом сообщении
+        /// </summary>
+        [JsonIgnore]
+        public bool DisableLinkPreview { get; set; }
+
+        /// <summary>
         /// Заполните это, если хотите изменить текущее сообщение
         /// </summary>
         [JsonPropertyName("message")]
@@ -25,7 +31,7 @@ namespace KmsDev.MaxBot.Requests
         /// Заполните это, если хотите просто отправить одноразовое уведомление пользователю
         /// </summary>
         [JsonPropertyName("notification")]
-        public bool? Notification { get; set; }
+        public string? Notification { get; set; }
 
 
         public override MaxBotRequestHttpSettings GetRequestHttpSettings()
@@ -33,7 +39,15 @@ namespace KmsDev.MaxBot.Requests
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Post,
-                Url = $"answers?callback_id={CallbackId}"
+                Url = MaxBotRequestUrl.WithQuery
+                (
+                    "answers",
+                    new()
+                    {
+                        ["callback_id"] = CallbackId,
+                        ["disable_link_preview"] = MaxBotRequestUrl.Flag(DisableLinkPreview)
+                    }
+                )
             };
         }
 
@@ -63,6 +77,12 @@ namespace KmsDev.MaxBot.Requests
             /// </summary>
             [JsonPropertyName("attachments")]
             public List<ApiOutputAttachmentBase>? Attachments { get; set; }
+
+            /// <summary>
+            /// Ссылка на сообщение для ответа или пересылки
+            /// </summary>
+            [JsonPropertyName("link")]
+            public ApiNewMessageLink? Link { get; set; }
         }
 
         public class ResilienceDefaultSettings : MaxBotRequestResilienceDefaultSettings

@@ -1,6 +1,7 @@
 ﻿using KmsDev.MaxBot.Exceptions;
 using KmsDev.MaxBot.Responses;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
 using Polly.RateLimiting;
@@ -118,6 +119,10 @@ namespace KmsDev.MaxBot.Requests
                         {
                             c.BaseAddress = defaultUri;
                             c.Timeout = Timeout.InfiniteTimeSpan;
+                        })
+                        .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                        {
+                            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
                         })
                         .SetHandlerLifetime(TimeSpan.FromHours(1));
 

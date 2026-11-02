@@ -14,7 +14,7 @@ namespace KmsDev.MaxBot.Requests
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Get,
-                Url = $"messages/{MessageId}"
+                Url = MaxBotRequestUrl.WithQuery($"messages/{MessageId}")
             };
         }
 

@@ -33,4 +33,30 @@ namespace KmsDev.MaxBot
             }
         }
     }
+
+    internal class NullableUnixDateTimeOffsetConverter : JsonConverter<DateTimeOffset?>
+    {
+        private static readonly UnixDateTimeOffsetConverter _inner = new();
+
+        public override DateTimeOffset? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.Null)
+            {
+                return null;
+            }
+
+            return _inner.Read(ref reader, typeof(DateTimeOffset), options);
+        }
+
+        public override void Write(Utf8JsonWriter writer, DateTimeOffset? value, JsonSerializerOptions options)
+        {
+            if (value is null)
+            {
+                writer.WriteNullValue();
+                return;
+            }
+
+            _inner.Write(writer, value.Value, options);
+        }
+    }
 }

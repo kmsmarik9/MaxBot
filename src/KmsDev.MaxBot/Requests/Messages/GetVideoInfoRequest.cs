@@ -14,7 +14,7 @@ namespace KmsDev.MaxBot.Requests
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Get,
-                Url = $"videos/{Token}"
+                Url = MaxBotRequestUrl.WithQuery($"videos/{Token}")
             };
         }
 

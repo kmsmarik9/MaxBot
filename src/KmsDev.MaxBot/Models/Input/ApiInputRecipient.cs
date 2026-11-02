@@ -21,5 +21,11 @@ namespace KmsDev.MaxBot.Models
         /// </summary>
         [JsonPropertyName("user_id")]
         public long? UserId { get; init; }
+
+        /// <summary>
+        /// ID поста, если сообщение относится к комментариям
+        /// </summary>
+        [JsonPropertyName("post_id")]
+        public string? PostId { get; init; }
     }
 }

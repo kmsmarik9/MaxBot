@@ -23,8 +23,8 @@ namespace KmsDev.MaxBot
         [EnumValueByString("contact")]
         Contact = 60,
 
-        //[EnumValueByString("inline_keyboard")]
-        //InlineKeyboard = 70,
+        [EnumValueByString("inline_keyboard")]
+        InlineKeyboard = 70,
 
         [EnumValueByString("location")]
         Location = 80,

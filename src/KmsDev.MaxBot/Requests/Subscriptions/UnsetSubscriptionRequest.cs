@@ -14,7 +14,14 @@ namespace KmsDev.MaxBot.Requests
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Delete,
-                Url = $"subscriptions?url={Url}"
+                Url = MaxBotRequestUrl.WithQuery
+                (
+                    "subscriptions",
+                    new()
+                    {
+                        ["url"] = Url
+                    }
+                )
             };
         }
 

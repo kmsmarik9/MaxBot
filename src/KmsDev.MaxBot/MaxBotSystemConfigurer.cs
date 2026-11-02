@@ -13,6 +13,11 @@ namespace KmsDev.MaxBot
         /// </summary>
         public Uri BaseAddress { get; private set; } = DefaultBaseAddress;
 
+        /// <summary>
+        /// Только для тестов, не использовать на проде. <br/> Включить игнорирование проблем с сертификатом на сервере. 
+        /// </summary>
+        public bool UseDangerousAcceptAnyServerCertificateValidator { get; set; } = false;
+
         private (string BotToken, string? HashSeed)? _singletonOptions = null;
 
         public MaxBotSystemConfigurer(IServiceCollection services)

@@ -95,7 +95,7 @@ namespace KmsDev.MaxBot.Requests
             InitSystemRpb();
         }
 
-        internal void ConfigureServices(Uri baseAddress)
+        internal void ConfigureServices(Uri baseAddress, bool useDangerousAcceptAnyServerCertificateValidator)
         {
             {
                 var defaultUri = baseAddress;
@@ -120,11 +120,15 @@ namespace KmsDev.MaxBot.Requests
                             c.BaseAddress = defaultUri;
                             c.Timeout = Timeout.InfiniteTimeSpan;
                         })
-                        .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                        .SetHandlerLifetime(TimeSpan.FromHours(1));
+
+                    if (useDangerousAcceptAnyServerCertificateValidator)
+                    {
+                        httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
                         {
                             ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-                        })
-                        .SetHandlerLifetime(TimeSpan.FromHours(1));
+                        });
+                    }
 
                     {
                         Action<ResiliencePipelineBuilder<HttpResponseMessage>> finalRpbAction = _defaultRpbAction;

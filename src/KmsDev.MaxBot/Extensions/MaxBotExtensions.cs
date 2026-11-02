@@ -16,7 +16,7 @@ namespace KmsDev.MaxBot
             {
                 var conf = new MaxBotRequestsConfigurer(serviceCollection);
                 //requestConfigurer?.Invoke(requestsBuilder);
-                conf.ConfigureServices(systemConf.BaseAddress);
+                conf.ConfigureServices(systemConf.BaseAddress, systemConf.UseDangerousAcceptAnyServerCertificateValidator);
             }
 
             return serviceCollection;

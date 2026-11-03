@@ -1,6 +1,7 @@
 ﻿using KmsDev.MaxBot.Exceptions;
 using KmsDev.MaxBot.Responses;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
 using Polly.RateLimiting;
@@ -94,10 +95,10 @@ namespace KmsDev.MaxBot.Requests
             InitSystemRpb();
         }
 
-        internal void ConfigureServices()
+        internal void ConfigureServices(Uri baseAddress, bool useDangerousAcceptAnyServerCertificateValidator)
         {
             {
-                var defaultUri = new Uri("https://platform-api.max.ru/");
+                var defaultUri = baseAddress;
 
                 var requestTypes = AppDomain.CurrentDomain
                     .GetAssemblies()
@@ -120,6 +121,14 @@ namespace KmsDev.MaxBot.Requests
                             c.Timeout = Timeout.InfiniteTimeSpan;
                         })
                         .SetHandlerLifetime(TimeSpan.FromHours(1));
+
+                    if (useDangerousAcceptAnyServerCertificateValidator)
+                    {
+                        httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                        {
+                            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                        });
+                    }
 
                     {
                         Action<ResiliencePipelineBuilder<HttpResponseMessage>> finalRpbAction = _defaultRpbAction;

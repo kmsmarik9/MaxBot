@@ -34,8 +34,11 @@ namespace KmsDev.MaxBot.Models
         [JsonPropertyName("is_bot")]
         public required bool IsBot { get; init; }
 
+        /// <summary>
+        /// Время последней активности в миллисекундах Unix. Может отсутствовать, если пользователь скрыл статус «в сети».
+        /// </summary>
         [JsonPropertyName("last_activity_time")]
-        [JsonConverter(typeof(UnixDateTimeOffsetConverter))]
-        public required DateTimeOffset LastActivityTime { get; init; }
+        [JsonConverter(typeof(NullableUnixDateTimeOffsetConverter))]
+        public DateTimeOffset? LastActivityTime { get; init; }
     }
 }

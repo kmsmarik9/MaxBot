@@ -35,12 +35,25 @@ namespace KmsDev.MaxBot.Requests
         [JsonPropertyName("attachments")]
         public List<ApiOutputAttachmentBase>? Attachments { get; set; }
 
+        /// <summary>
+        /// Ссылка на сообщение для ответа или пересылки
+        /// </summary>
+        [JsonPropertyName("link")]
+        public ApiNewMessageLink? Link { get; set; }
+
         public override MaxBotRequestHttpSettings GetRequestHttpSettings()
         {
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Put,
-                Url = $"messages?message_id={MessageId}"
+                Url = MaxBotRequestUrl.WithQuery
+                (
+                    "messages",
+                    new()
+                    {
+                        ["message_id"] = MessageId
+                    }
+                )
             };
         }
 

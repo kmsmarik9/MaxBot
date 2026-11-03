@@ -29,6 +29,10 @@ namespace KmsDev.MaxBot.Models
         [JsonIgnore]
         public ApiInputMessageAttachmentPolymorphContainer? AttachmentContainer { get { return _attachmentsContainer.FirstOrDefault(); }  }
 
-        //TODO markup
+        /// <summary>
+        /// Разметка текста сообщения
+        /// </summary>
+        [JsonPropertyName("markup")]
+        public List<ApiInputMarkupElementPolymorphContainer>? Markup { get; init; }
     }
 }

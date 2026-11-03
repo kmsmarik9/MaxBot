@@ -28,8 +28,8 @@ namespace KmsDev.MaxBot.Models
         /// <summary>
         /// Администратор, который удалил пользователя из чата. Может быть null, если пользователь покинул чат сам
         /// </summary>
-        [JsonPropertyName("inviter_id")]
-        public long InviterId { get; init; }
+        [JsonPropertyName("admin_id")]
+        public long? AdminId { get; init; }
 
         /// <summary>
         /// Указывает, был ли пользователь удалён из канала или нет

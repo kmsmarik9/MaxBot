@@ -29,7 +29,7 @@ namespace KmsDev.MaxBot.Models
         /// Пользователь, который добавил пользователя в чат. Может быть null, если пользователь присоединился к чату по ссылке
         /// </summary>
         [JsonPropertyName("inviter_id")]
-        public long InviterId { get; init; }
+        public long? InviterId { get; init; }
 
         /// <summary>
         /// Указывает, был ли пользователь добавлен в канал или нет

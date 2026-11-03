@@ -29,7 +29,7 @@ namespace KmsDev.MaxBot.Requests
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Post,
-                Url = "subscriptions"
+                Url = MaxBotRequestUrl.WithQuery("subscriptions")
             };
         }
 

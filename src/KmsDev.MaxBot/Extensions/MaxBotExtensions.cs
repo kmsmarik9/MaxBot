@@ -9,16 +9,14 @@ namespace KmsDev.MaxBot
         {
             serviceCollection.AddSingleton<IMaxBotClientBuilder, MaxBotClientBuilderInternal>();
 
-            {
-                var conf = new MaxBotSystemConfigurer(serviceCollection);
-                systemConfigurer?.Invoke(conf);
-                conf.ConfigureServices();
-            }
+            var systemConf = new MaxBotSystemConfigurer(serviceCollection);
+            systemConfigurer?.Invoke(systemConf);
+            systemConf.ConfigureServices();
 
             {
                 var conf = new MaxBotRequestsConfigurer(serviceCollection);
                 //requestConfigurer?.Invoke(requestsBuilder);
-                conf.ConfigureServices();
+                conf.ConfigureServices(systemConf.BaseAddress, systemConf.UseDangerousAcceptAnyServerCertificateValidator);
             }
 
             return serviceCollection;

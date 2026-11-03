@@ -30,7 +30,8 @@ namespace KmsDev.MaxBot.Models
         [MaxBotSourceGeneratePolymorphItem("location")]
         public readonly ApiInputLocationAttachment? Location;
 
-        //TODO inline_keyboard
+        [MaxBotSourceGeneratePolymorphItem("inline_keyboard")]
+        public readonly ApiInputInlineKeyboardAttachment? InlineKeyboard;
 
         public string? UnknowData { get; private set; }
     }

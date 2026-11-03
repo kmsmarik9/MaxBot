@@ -10,7 +10,7 @@ namespace KmsDev.MaxBot.Requests
         private static readonly MaxBotRequestHttpSettings _requestSettings = new()
         {
             Method = HttpMethod.Get,
-            Url = "me"
+            Url = MaxBotRequestUrl.WithQuery("me")
         };
 
         public override MaxBotRequestHttpSettings GetRequestHttpSettings()

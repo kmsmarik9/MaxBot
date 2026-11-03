@@ -17,7 +17,7 @@ namespace KmsDev.MaxBot
         [EnumValueByString("request_contact")]
         RequestContact = 40,
 
-        [EnumValueByString("open_appp")]
+        [EnumValueByString("open_app")]
         OpenApp = 50,
 
         [EnumValueByString("message")]

@@ -15,7 +15,7 @@ namespace KmsDev.MaxBot.Models
         public string? Token
         {
             get { return Payload?.Token; }
-            set { Payload.Url = value; }
+            set { Payload.Token = value; }
         }
 
         [JsonInclude]

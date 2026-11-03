@@ -15,7 +15,14 @@ namespace KmsDev.MaxBot.Requests
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Post,
-                Url = $"uploads?type={UploadType}".ToLowerInvariant()
+                Url = MaxBotRequestUrl.WithQuery
+                (
+                    "uploads",
+                    new()
+                    {
+                        ["type"] = EnumByStringConverter<MaxBotUploadType>.ToWire(UploadType)
+                    }
+                )
             };
         }
 

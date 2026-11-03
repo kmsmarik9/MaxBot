@@ -1,0 +1,76 @@
+---
+description: Синхронизация ручного клиента KmsDev.MaxBot с официальным schema.yaml MAX. Применять при подтягивании методов, моделей и расхождений с api-schema, не при обычных правках бизнес-логики.
+globs: src/KmsDev.MaxBot/**/*.cs
+alwaysApply: false
+---
+
+# Синхронизация schema.yaml с KmsDev.MaxBot
+
+Подтягивать официальную схему MAX к ручному клиенту. Клиент не генерировать из OpenAPI. NSwag из README схемы не подключать: библиотека собрана вручную вокруг `RequestBase`, Metalama и своих полиморфных контейнеров.
+
+## Источник истины
+
+- Схема: https://github.com/max-messenger/api-schema , файл `schema.yaml` на `main`. Сырой URL: `https://raw.githubusercontent.com/max-messenger/api-schema/main/schema.yaml`.
+- Хост и правила авторизации брать из `README.mdx` того же репозитория, не из `servers.url`. В YAML хост равен `/`. На 2026-11-02 документация требует `https://platform-api2.max.ru/` и заголовок `Authorization: <token>` без `Bearer`.
+- Пояснения к методам, которых нет в YAML, сверять с https://dev.max.ru/docs-api . Если текст метода и `components/schemas` расходятся, для моделей верить схеме, расхождение текста отметить в итоге.
+- Снимок ниже снят 2026-11-02 (33 `operationId`). Перед правками заново скачать YAML и пересчитать список операций. Не править код по этому снимку, если схема уже изменилась.
+
+## Что не менять
+
+- Не заменять `IMaxBotClient`, Polly, `BotHash`, Handlers и LongPollingManager сгенерированным клиентом.
+- Авторизация остаётся сырым токеном в `Authorization`. Реализация: `src/KmsDev.MaxBot/Internal/MaxBotClientInternal.cs`.
+- Проверку `X-Max-Bot-Api-Secret` в библиотеку не переносить: её делает хост, как в README.
+- `ValidateWebappInitData` в схеме нет. Не удалять.
+- Upload бинарника на выданный URL в OpenAPI отдельным path не описан. Хелперы `Upload*DataRequest` сохранять: `multipart`, поле `data`, `IncludeAuthorizationToken = false`.
+- Неизвестный `update_type` и неизвестный `type` вложения по-прежнему складывать в `UnknowData`, не бросать исключение на весь webhook.
+
+## Как снять diff
+
+1. Скачать `schema.yaml`.
+2. Выписать каждый path: метод, путь, `operationId`, query/path-параметры, `$ref` тела и ответа `200`.
+3. Сопоставить с `GetRequestHttpSettings()` в `src/KmsDev.MaxBot/Requests`. Имя класса не обязано совпадать с `operationId`; совпадать должны метод, путь и место параметра (path, query, body).
+4. Для каждой задействованной схемы выписать `properties`, `required`, `nullable`, `discriminator.mapping`, `enum`, `deprecated`.
+5. Сверить wire-строки enum и дискриминаторов с `[EnumValueByString]` и `[JsonDerivedType]` / `[MaxBotSourceGeneratePolymorphItem]`. Имена C# не важны, строки JSON важны.
+6. Отдельно пройти `allOf`: поля наследника лежат во втором элементе, базовые поля (`update_type`, `timestamp`, поля `User`) легко пропустить.
+7. Итог разложить на три списка: метод отсутствует, метод есть но параметр или тип поля врёт, модель неполная. Deprecated-параметры не удалять молча, если они уже в публичном API: добавить актуальные и пометить старые устаревшими.
+
+## Как добавлять метод
+
+Образец: `src/KmsDev.MaxBot/Requests/Messages/EditMessageRequest.cs` и `src/KmsDev.MaxBot/Requests/Subscriptions/SetSubscriptionRequest.cs`.
+
+- Класс `partial` наследует `RequestBase<TResponse>`. Рядом вложенный `ResilienceDefaultSettings` с retry 3 и delay 30 секунд, если у метода нет особого pipeline.
+- Extension `*Async` класть в тот же файл, в `namespace KmsDev.MaxBot`, на секцию `MaxBotClientApiContainer`. Новую секцию заводить только для нового tag схемы. Сейчас секции: `Bots`, `Messages`, `Subscriptions`, `Upload`. Чаты — новая `ChatsSection` в `src/KmsDev.MaxBot/MaxBotClientApiContainer.cs`, папка `src/KmsDev.MaxBot/Requests/Chat` уже заведена и пуста. Комментарии остаются в `Messages`.
+- `RequestBase.GetRequestHttpContent` сериализует весь объект запроса в JSON. Path и query нельзя оставлять обычными свойствами: помечать `[JsonIgnore]` и собирать URL в `GetRequestHttpSettings`. Иначе GET унесёт их в body, как сейчас `limit`/`marker` у `GetUpdatesRequest`.
+- Тело запроса — свойства с `[JsonPropertyName]` в snake_case. Имена брать из схемы, не из `JsonNamingPolicy`: политика в клиенте есть, но существующие модели задают имена явно.
+- Query-списки (`message_ids`, `types`) сериализовать одной строкой через запятую: `?ids=1,2`, не повторяющимся ключом.
+- Ответ: отдельный тип в `Responses`, маркер `IMaxBotJsonResponse`. Поля ответа только те, что есть в схеме `200`. Текст operation description не добавляет полей, которых нет в schema (у `getMessages` текст говорит про marker, а `MessageList` содержит только `messages`).
+- Ошибки схемы (`Error`: `code`, `message`) уже обрабатываются общим путём. Отдельный тип ошибки на метод не заводить, кроме уже существующего `attachment.not.ready` у отправки.
+- XML-ответы загрузки (`retval`) не переводить на JSON: это контракт upload-хоста, не platform API.
+
+## Как добавлять модель
+
+- Входящие сущности: `ApiInput*`, исходящие вложения и кнопки: `ApiOutput*`. Не плодить вторую иерархию под каждый operation, если схема ссылается на уже существующий тип (`Message`, `NewMessageBody`, `User`, `ChatMember`).
+- `nullable: true` или отсутствие в `required` — ссылочный тип или `Nullable<T>`. Не ставить `required` на поле, которое схема разрешает опустить. На 2026-11-02 это ломает `User.last_activity_time` и `UserAdded.inviter_id`.
+- Unix-время в миллисекундах — `DateTimeOffset` плюс уже используемый `UnixDateTimeOffsetConverter`.
+- Входящий полиморфизм (`Update`, `Attachment`, при необходимости `MarkupElement`, `Button`): контейнер с `[MaxBotSourceGeneratePolymorphContainer("update_type"|"type")]` и `[MaxBotSourceGeneratePolymorphItem("<wire-value>")]`. Конвертер только читает JSON. Новое событие добавлять и в контейнер, и в `MaxBotUpdateType`.
+- Исходящий полиморфизм вложений и кнопок: `[JsonPolymorphic]` / `[JsonDerivedType(typeof(...), "wire-value")]` на базе, как в `src/KmsDev.MaxBot/Models/Output/Attachment/ApiOutputAttachmentBase.cs`. Wire-строка должна буквально совпасть со схемой. Не расширять сломанный `ApiAttachmentButtonType` (`open_appp`), если сериализация уже идёт через `JsonDerivedType`.
+- `oneOf`/`discriminator` не заменять одним классом с опциональными полями всех веток.
+- Ограничения `maxLength`, `minItems`, `pattern` в код не тащить: их проверяет сервер. Допустимо отразить лимит в xml-doc.
+
+## Порядок работ
+
+Каждый шаг заново сверять с только что скачанным YAML. Снимок 2026-11-02 задаёт стартовый backlog, не закрытый список.
+
+1. Транспорт. Базовый URL в `src/KmsDev.MaxBot/Requests/MaxBotRequestsConfigurer.cs` сейчас `https://platform-api.max.ru/`. По README схемы нужен `https://platform-api2.max.ru/`. `GET /updates`: `limit`, `timeout` (0–90, default 30), `marker`, `types` — query. Прокинуть `timeout` в `src/KmsDev.MaxBot.LongPollingManager/MaxBotLongPollingExtensions.cs`. Клиентский `HttpClient.Timeout` не подменяет query `timeout`.
+2. Уже существующие messages. `CallbackAnswer.notification` — `string`, не `bool?`. У `POST /answers` добавить query `disable_link_preview`. В send/edit добавить `link` (`NewMessageLink`: `type` = `reply`|`forward`, `mid`). У `GET /messages` добавить `before`/`after`; `from`/`to` в схеме deprecated. Добавить `DELETE /messages?message_id=`.
+3. Модели, без которых новые методы будут врать. `GetMeResponse` дополнить `commands` (`BotCommand`: `name`, `description`). `MessageBody.markup`. `Recipient.post_id`. Nullable `last_activity_time` и `inviter_id`. Входящий `inline_keyboard` в `src/KmsDev.MaxBot/Models/Input/Attachment/ApiInputMessageAttachmentPolymorphContainer.cs`. События `comment_created`, `comment_edited`, `comment_removed` (`post_id` у removed), `bot_admin_permissions_changed`. Починить setter `ApiOutputShareAttachment.Token`: он пишет в `Payload.Url`. Починить строку `open_appp` в `src/KmsDev.MaxBot/Enums/ApiAttachmentButtonType.cs`, если enum ещё где-то сериализуется.
+4. Методы, которых на снимке нет. `PATCH /me/commands`. Чаты: `GET/PATCH /chats/{chatId}`, `POST /chats/{chatId}/actions` (`typing_on`, `sending_photo`, `sending_video`, `sending_audio`, `sending_file`, `mark_seen`), pin `GET/PUT/DELETE`, `members/me` `GET/DELETE`, admins `GET/POST` и `DELETE .../admins/{userId}`, members `GET/POST/DELETE`. Комментарии: `GET/POST/PUT/DELETE /messages/{messageId}/comments`, `GET .../comments/{commentId}`. У send comment вложений нет (`NewCommentBody`: `text`, `link`, `format`).
+
+На снимке уже совпадало и трогать только при изменении YAML: auth, пути `GET /me`, subscriptions, `POST /uploads?type=`, send/edit messages (кроме `link`), `GET /messages/{messageId}`, `GET /videos/{videoToken}`, дискриминаторы вложений кроме входящей клавиатуры, 15 из 19 `update_type`, `User`/`Message`/`LinkedMessage`/`Callback`/`Subscription`/`TextFormat`/`ChatType`.
+
+## Проверка после правок
+
+- Для каждого нового или исправленного запроса проследить URL: метод, path, query. Убедиться, что path/query-свойства не попадают в JSON body.
+- Для каждого нового `update_type` и `type` вложения прогнать разбор реального примера JSON из схемы или документации и проверить, что заполнилась конкретная ветка, а не `UnknowData`.
+- Сборка трёх проектов решения. Публичные переименования и смену типа `notification` с `bool?` на `string` явно указать в итоге: это ломает вызывающий код.
+- README секций (`Api.Chats` «в разработке») обновить только если секция реально появилась.

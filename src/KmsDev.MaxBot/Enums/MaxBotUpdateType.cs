@@ -48,6 +48,18 @@ namespace KmsDev.MaxBot
         BotStopped = 140,
 
         [EnumValueByString("chat_title_changed")]
-        ChatTitleChanged = 150
+        ChatTitleChanged = 150,
+
+        [EnumValueByString("comment_created")]
+        CommentCreated = 160,
+
+        [EnumValueByString("comment_edited")]
+        CommentEdited = 170,
+
+        [EnumValueByString("comment_removed")]
+        CommentRemoved = 180,
+
+        [EnumValueByString("bot_admin_permissions_changed")]
+        BotAdminPermissionsChanged = 190
     }
 }

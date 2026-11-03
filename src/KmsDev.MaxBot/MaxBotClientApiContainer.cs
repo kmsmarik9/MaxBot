@@ -8,12 +8,14 @@
             Messages = new(maxBotClient);
             Subscriptions = new(maxBotClient);
             Upload = new(maxBotClient);
+            Chats = new(maxBotClient);
         }
 
         public BotsSection Bots { get; }
         public MessagesSection Messages { get; }
         public SubscriptionsSection Subscriptions { get; }
         public UploadSection Upload { get; }
+        public ChatsSection Chats { get; }
 
         #region sections
         public abstract class SectionBase
@@ -49,6 +51,13 @@
         public sealed class UploadSection : SectionBase
         {
             public UploadSection(IMaxBotClient maxBotClient) : base(maxBotClient)
+            {
+            }
+        }
+
+        public sealed class ChatsSection : SectionBase
+        {
+            internal ChatsSection(IMaxBotClient maxBotClient) : base(maxBotClient)
             {
             }
         }

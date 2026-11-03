@@ -3,7 +3,6 @@ using KmsDev.MaxBot.Models;
 using KmsDev.MaxBot.Requests;
 using KmsDev.MaxBot.Responses;
 using Polly;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -42,35 +41,32 @@ namespace KmsDev.MaxBot.Requests
         [JsonPropertyName("attachments")]
         public List<ApiOutputAttachmentBase>? Attachments { get; set; }
 
+        /// <summary>
+        /// Ссылка на сообщение для ответа или пересылки
+        /// </summary>
+        [JsonPropertyName("link")]
+        public ApiNewMessageLink? Link { get; set; }
+
         public override MaxBotRequestHttpSettings GetRequestHttpSettings()
         {
-            var requestUrlBuilder = new StringBuilder("messages");
-
-            switch (Target.TargetType)
+            if (Target.TargetType is not (TargetType.User or TargetType.Chat))
             {
-                case TargetType.User:
-                    {
-                        requestUrlBuilder.Append($"?user_id={Target.Id}");
-                        break;
-                    }
-                case TargetType.Chat:
-                    {
-                        requestUrlBuilder.Append($"?chat_id={Target.Id}");
-                        break;
-                    }
-                default:
-                    throw new ArgumentException("TargetType invalid");
-            }
-
-            if (DisableLinkPreview)
-            {
-                requestUrlBuilder.Append("&disable_link_preview=true");
+                throw new ArgumentException("TargetType invalid");
             }
 
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Post,
-                Url = requestUrlBuilder.ToString()
+                Url = MaxBotRequestUrl.WithQuery
+                (
+                    "messages",
+                    new()
+                    {
+                        ["user_id"] = Target.TargetType == TargetType.User ? Target.Id.ToString() : null,
+                        ["chat_id"] = Target.TargetType == TargetType.Chat ? Target.Id.ToString() : null,
+                        ["disable_link_preview"] = MaxBotRequestUrl.Flag(DisableLinkPreview)
+                    }
+                )
             };
         }
 

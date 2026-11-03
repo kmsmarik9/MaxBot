@@ -21,7 +21,7 @@ namespace KmsDev.MaxBot.Requests.Upload
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Post,
-                Url = UploadUrl,
+                Url = MaxBotRequestUrl.WithQuery(UploadUrl),
                 IncludeAuthorizationToken = false
             };
         }

@@ -12,7 +12,7 @@ namespace KmsDev.MaxBot.Requests
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Get,
-                Url = "subscriptions"
+                Url = MaxBotRequestUrl.WithQuery("subscriptions")
             };
         }
 

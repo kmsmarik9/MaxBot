@@ -112,7 +112,8 @@ namespace KmsDev.MaxBot
 
             using var httpContent = request.GetRequestHttpContent()!;
 
-            var q = await httpContent.ReadAsStringAsync(cancellationToken);
+            //TODO add debug info
+            //var responseAsText = await httpContent.ReadAsStringAsync(cancellationToken);
 
             using var httpRequestMessage = new HttpRequestMessage(requestSettings.Method, requestSettings.Url)
             {

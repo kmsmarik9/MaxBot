@@ -13,11 +13,25 @@ namespace KmsDev.MaxBot.Requests
         [JsonIgnore]
         public OneOf<long, string[]> Target { get; set; }
 
+        [Obsolete("Параметр from устарел в схеме MAX. Используйте After.")]
         [JsonIgnore]
         public DateTimeOffset? From { get; set; }
 
+        [Obsolete("Параметр to устарел в схеме MAX. Используйте Before.")]
         [JsonIgnore]
         public DateTimeOffset? To { get; set; }
+
+        /// <summary>
+        /// Сообщения до этой отметки времени
+        /// </summary>
+        [JsonIgnore]
+        public DateTimeOffset? Before { get; set; }
+
+        /// <summary>
+        /// Сообщения после этой отметки времени
+        /// </summary>
+        [JsonIgnore]
+        public DateTimeOffset? After { get; set; }
 
         [JsonIgnore]
         public int? Count { get; set; }
@@ -25,33 +39,36 @@ namespace KmsDev.MaxBot.Requests
 
         public override MaxBotRequestHttpSettings GetRequestHttpSettings()
         {
-            var queryParams = new List<string>(4);
+            string? chatId = null;
+            string? messageIds = null;
 
             Target.Switch
             (
-                chatId => queryParams.Add($"chat_id={chatId}"),
-                messageIds => queryParams.Add($"message_ids={string.Join(',', messageIds)}")
+                id => chatId = id.ToString(),
+                ids => messageIds = MaxBotRequestUrl.Join(ids)
             );
 
-            if (From.HasValue)
-            {
-                queryParams.Add($"from={From.Value.ToUnixTimeMilliseconds()}");
-            }
-
-            if (To.HasValue)
-            {
-                queryParams.Add($"to={To.Value.ToUnixTimeMilliseconds()}");
-            }
-
-            if (Count.HasValue)
-            {
-                queryParams.Add($"count={Count}");
-            }
+#pragma warning disable CS0618
+            var url = MaxBotRequestUrl.WithQuery
+            (
+                "messages",
+                new()
+                {
+                    ["chat_id"] = chatId,
+                    ["message_ids"] = messageIds,
+                    ["from"] = MaxBotRequestUrl.UnixMilliseconds(From),
+                    ["to"] = MaxBotRequestUrl.UnixMilliseconds(To),
+                    ["before"] = MaxBotRequestUrl.UnixMilliseconds(Before),
+                    ["after"] = MaxBotRequestUrl.UnixMilliseconds(After),
+                    ["count"] = MaxBotRequestUrl.Number(Count)
+                }
+            );
+#pragma warning restore CS0618
 
             return new MaxBotRequestHttpSettings
             {
                 Method = HttpMethod.Get,
-                Url = $"messages?{string.Join('&', queryParams)}"
+                Url = url
             };
         }
 

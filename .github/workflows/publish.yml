@@ -6,6 +6,8 @@ on:
 
 jobs:
   build:
+    permissions:
+      id-token: write
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -19,5 +21,11 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Pack
       run: dotnet pack --configuration Release --no-build --output ./nupkg /p:Version=${GITHUB_REF_NAME#v}
+    # Get a short-lived NuGet API key
+    - name: NuGet login (OIDC → temp API key)
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ${{secrets.NUGET_USER}}
     - name: Publish to NuGet
-      run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json --skip-duplicate
